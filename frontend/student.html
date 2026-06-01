@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumina — Student Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --bg:           #1a1814;
+      --bg-card:      #211f1b;
+      --bg-elevated:  #2a2723;
+      --border:       rgba(255,255,255,0.07);
+      --border-hover: rgba(212,168,75,0.3);
+      --text-primary:   #f0ebe0;
+      --text-secondary: #9e9890;
+      --text-muted:     #5c5850;
+      --accent:         #d4a84b;
+      --accent-glow:    rgba(212,168,75,0.13);
+      --accent-hover:   #e8c06a;
+      --success:  #6ec98a;
+      --warning:  #e8a94b;
+      --error:    #e07070;
+      --info:     #6ab0e8;
+      --sidebar-w: 240px;
+      --nav-h: 64px;
+      --radius: 12px;
+      --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text-primary); min-height:100vh; display:flex; flex-direction:column; }
+
+    .blob { position:fixed; border-radius:50%; filter:blur(100px); pointer-events:none; z-index:0; opacity:0.15; }
+    .blob-1 { width:500px;height:500px; background:radial-gradient(circle,#c47d1a,transparent 70%); top:-150px;left:-100px; }
+    .blob-2 { width:400px;height:400px; background:radial-gradient(circle,#2a5c8a,transparent 70%); bottom:-100px;right:-80px; }
+
+    /* ══ TOP NAV ══ */
+    .topnav {
+      position:fixed; top:0; left:0; right:0; height:var(--nav-h);
+      background:rgba(26,24,20,0.88); backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--border);
+      display:flex; align-items:center; padding:0 28px; gap:20px; z-index:100;
+    }
+    .nav-brand { display:flex; align-items:center; gap:9px; text-decoration:none; margin-right:auto; }
+    .nav-brand-icon { color:var(--accent); font-size:1.2rem; animation:spin 8s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .nav-brand-name { font-family:'Lora',serif; font-size:1.15rem; font-weight:600; color:var(--text-primary); }
+    .nav-welcome { font-size:0.85rem; color:var(--text-secondary); }
+    .nav-welcome strong { color:var(--text-primary); font-weight:500; }
+    .nav-avatar { width:34px;height:34px; border-radius:50%; background:linear-gradient(135deg,var(--accent),#a06e20); display:flex; align-items:center; justify-content:center; font-size:0.85rem; font-weight:600; color:#1a1510; cursor:pointer; border:2px solid rgba(212,168,75,0.3); flex-shrink:0; }
+    .nav-logout { padding:7px 16px; background:rgba(224,112,112,0.1); color:var(--error); border:1px solid rgba(224,112,112,0.2); border-radius:8px; cursor:pointer; font-size:0.82rem; font-family:'DM Sans',sans-serif; font-weight:500; transition:background var(--transition); }
+    .nav-logout:hover { background:rgba(224,112,112,0.2); }
+
+    /* ══ SHELL ══ */
+    .app-shell { display:flex; margin-top:var(--nav-h); min-height:calc(100vh - var(--nav-h)); position:relative; z-index:1; }
+
+    /* ══ SIDEBAR ══ */
+    .sidebar {
+      width:var(--sidebar-w); flex-shrink:0;
+      background:rgba(33,31,27,0.6); border-right:1px solid var(--border);
+      padding:28px 14px; display:flex; flex-direction:column; gap:4px;
+      position:sticky; top:var(--nav-h); height:calc(100vh - var(--nav-h)); overflow-y:auto;
+    }
+    .sidebar-section { font-size:0.7rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); padding:14px 10px 6px; }
+    .sidebar-link { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:9px; text-decoration:none; color:var(--text-secondary); font-size:0.9rem; font-weight:400; transition:background var(--transition),color var(--transition); cursor:pointer; border:none; background:none; width:100%; text-align:left; font-family:'DM Sans',sans-serif; }
+    .sidebar-link:hover { background:var(--bg-elevated); color:var(--text-primary); }
+    .sidebar-link.active { background:var(--accent-glow); color:var(--accent); font-weight:500; }
+    .s-icon { font-size:1rem; width:20px; text-align:center; flex-shrink:0; }
+    .sidebar-badge { margin-left:auto; background:rgba(224,112,112,0.2); color:var(--error); font-size:0.7rem; font-weight:600; padding:2px 7px; border-radius:20px; }
+
+    /* ══ MAIN ══ */
+    .main { flex:1; padding:36px 40px; overflow-y:auto; animation:fadeUp 0.4s ease both; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+    .page-header { margin-bottom:32px; }
+    .page-header h1 { font-family:'Lora',serif; font-size:1.9rem; font-weight:600; margin-bottom:4px; }
+    .page-header p { color:var(--text-secondary); font-size:0.9rem; font-weight:300; }
+
+    .section-title { font-size:0.78rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); margin-bottom:14px; }
+
+    /* ══ STATS ══ */
+    .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:36px; }
+    .stat-card {
+      background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+      padding:22px 24px; display:flex; align-items:center; gap:18px;
+      transition:border-color var(--transition),transform var(--transition); animation:fadeUp 0.4s ease both;
+    }
+    .stat-card:nth-child(1){animation-delay:.05s} .stat-card:nth-child(2){animation-delay:.1s} .stat-card:nth-child(3){animation-delay:.15s}
+    .stat-card:hover { border-color:var(--border-hover); transform:translateY(-2px); }
+    .stat-ring { position:relative; width:54px;height:54px; flex-shrink:0; }
+    .stat-ring svg { transform:rotate(-90deg); }
+    .stat-ring-track { fill:none; stroke:var(--bg-elevated); stroke-width:4; }
+    .stat-ring-fill  { fill:none; stroke-width:4; stroke-linecap:round; transition:stroke-dashoffset 1s cubic-bezier(0.4,0,0.2,1); }
+    .stat-ring-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:600; color:var(--text-primary); }
+    .stat-value { font-family:'Lora',serif; font-size:1.7rem; font-weight:600; line-height:1; margin-bottom:3px; }
+    .stat-label { font-size:0.82rem; color:var(--text-secondary); }
+    .stat-sub   { font-size:0.75rem; color:var(--text-muted); margin-top:2px; }
+
+    /* ══ ACTION CARDS ══ */
+    .cards-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:14px; margin-bottom:36px; }
+
+    .action-card {
+      background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+      padding:22px 20px; text-decoration:none; color:var(--text-primary);
+      display:flex; flex-direction:column; gap:10px;
+      cursor:pointer; transition:border-color var(--transition),transform var(--transition),box-shadow var(--transition);
+      position:relative; overflow:hidden; animation:fadeUp 0.4s ease both;
+    }
+    .action-card:nth-child(1){animation-delay:.07s} .action-card:nth-child(2){animation-delay:.12s}
+    .action-card:nth-child(3){animation-delay:.17s} .action-card:nth-child(4){animation-delay:.22s}
+    .action-card:nth-child(5){animation-delay:.27s} .action-card:nth-child(6){animation-delay:.32s}
+    .action-card:nth-child(7){animation-delay:.37s} .action-card:nth-child(8){animation-delay:.42s}
+
+    .action-card:hover { border-color:var(--border-hover); transform:translateY(-3px); box-shadow:0 10px 30px rgba(0,0,0,0.4); }
+
+    /* top accent stripe */
+    .action-card::after { content:''; position:absolute; top:0;left:0;right:0; height:2px; border-radius:var(--radius) var(--radius) 0 0; opacity:0.7; }
+    .ac-gold::after   { background:var(--accent); }
+    .ac-blue::after   { background:var(--info); }
+    .ac-green::after  { background:var(--success); }
+    .ac-red::after    { background:var(--error); }
+    .ac-purple::after { background:#b07de8; }
+    .ac-teal::after   { background:#4ec9b0; }
+
+    .ac-icon { width:38px;height:38px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1.15rem; }
+    .ac-gold   .ac-icon { background:rgba(212,168,75,0.12); }
+    .ac-blue   .ac-icon { background:rgba(106,176,232,0.12); }
+    .ac-green  .ac-icon { background:rgba(110,201,138,0.12); }
+    .ac-red    .ac-icon { background:rgba(224,112,112,0.12); }
+    .ac-purple .ac-icon { background:rgba(176,125,232,0.12); }
+    .ac-teal   .ac-icon { background:rgba(78,201,176,0.12); }
+
+    .ac-title { font-weight:600; font-size:0.95rem; line-height:1.2; }
+    .ac-desc  { font-size:0.8rem; color:var(--text-secondary); line-height:1.5; font-weight:300; }
+    .ac-arrow { margin-top:auto; font-size:0.75rem; color:var(--text-muted); display:flex; align-items:center; gap:4px; transition:gap var(--transition),color var(--transition); }
+    .action-card:hover .ac-arrow { gap:8px; color:var(--accent); }
+
+    /* ══ WEAK PANEL ══ */
+    .weak-panel { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:22px 24px; display:none; animation:fadeUp 0.3s ease both; }
+    .weak-panel.open { display:block; }
+    .weak-panel h3 { font-family:'Lora',serif; font-size:1.05rem; font-weight:600; margin-bottom:14px; }
+    .weak-tag { display:inline-flex; align-items:center; gap:5px; background:rgba(224,112,112,0.12); color:var(--error); border:1px solid rgba(224,112,112,0.2); padding:5px 14px; border-radius:20px; font-size:0.82rem; margin:4px; }
+    .empty-state { color:var(--text-muted); font-size:0.875rem; font-style:italic; }
+
+    /* ══ ACTIVITY ROW ══ */
+    .activity-row { display:grid; grid-template-columns:1fr 320px; gap:20px; margin-bottom:36px; }
+    .activity-feed { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+    .af-header { padding:18px 22px; border-bottom:1px solid var(--border); font-size:0.9rem; font-weight:500; }
+    .af-item { display:flex; align-items:flex-start; gap:14px; padding:14px 22px; border-bottom:1px solid var(--border); transition:background var(--transition); }
+    .af-item:last-child { border-bottom:none; }
+    .af-item:hover { background:var(--bg-elevated); }
+    .af-dot { width:8px;height:8px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+    .af-text { font-size:0.85rem; color:var(--text-secondary); line-height:1.5; }
+    .af-time { font-size:0.75rem; color:var(--text-muted); margin-top:2px; }
+
+    .tip-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; display:flex; flex-direction:column; gap:12px; }
+    .tip-label { font-size:0.7rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); }
+    .tip-text { font-family:'Lora',serif; font-size:1.05rem; font-style:italic; color:var(--text-primary); line-height:1.6; }
+    .tip-action { display:inline-flex; align-items:center; gap:6px; font-size:0.82rem; color:var(--accent); font-weight:500; cursor:pointer; background:none; border:none; padding:0; font-family:'DM Sans',sans-serif; margin-top:4px; }
+
+    /* ══ RESPONSIVE ══ */
+    @media(max-width:900px) { .sidebar{display:none} .main{padding:24px 20px} .stats-row{grid-template-columns:1fr 1fr} .activity-row{grid-template-columns:1fr} }
+    @media(max-width:560px) { .stats-row{grid-template-columns:1fr} .cards-grid{grid-template-columns:1fr 1fr} }
+  </style>
+</head>
+<body>
+
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <header class="topnav">
+    <a href="#" class="nav-brand">
+      <span class="nav-brand-icon">✦</span>
+      <span class="nav-brand-name">Lumina</span>
+    </a>
+    <span class="nav-welcome">Good morning, <strong id="nav-name">—</strong></span>
+    <div class="nav-avatar" id="nav-avatar">?</div>
+    <button class="nav-logout" onclick="logout()">Sign out</button>
+  </header>
+
+  <div class="app-shell">
+
+    <aside class="sidebar">
+      <div class="sidebar-section">Learn</div>
+      <a href="chat.html" class="sidebar-link active"><span class="s-icon">🤖</span> AI Tutor Chat</a>
+      <a href="quiz.html" class="sidebar-link"><span class="s-icon">📝</span> Take a Quiz</a>
+      <a href="quiz-history.html" class="sidebar-link"><span class="s-icon">📋</span> Quiz History</a>
+      <a href="chat-history.html" class="sidebar-link"><span class="s-icon">💬</span> Chat History</a>
+
+      <div class="sidebar-section">Track</div>
+      <a href="progress.html" class="sidebar-link"><span class="s-icon">📊</span> My Progress</a>
+      <button class="sidebar-link" onclick="toggleWeakTopics()">
+        <span class="s-icon">⚠️</span> Weak Topics
+        <span class="sidebar-badge" id="weak-badge">—</span>
+      </button>
+
+      <div class="sidebar-section">Account</div>
+      <a href="profile.html" class="sidebar-link"><span class="s-icon">👤</span> My Profile</a>
+    </aside>
+
+    <main class="main">
+
+      <div class="page-header">
+        <h1>Dashboard</h1>
+        <p id="page-subtitle">Here's how your learning is going today.</p>
+      </div>
+
+      <div class="section-title">Your overview</div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-ring">
+            <svg width="54" height="54" viewBox="0 0 54 54">
+              <circle class="stat-ring-track" cx="27" cy="27" r="22"/>
+              <circle class="stat-ring-fill" id="ring-score" cx="27" cy="27" r="22" stroke="#d4a84b" stroke-dasharray="138.2" stroke-dashoffset="138.2"/>
+            </svg>
+            <div class="stat-ring-label" id="ring-score-label">—</div>
+          </div>
+          <div>
+            <div class="stat-value" id="avg-score" style="color:var(--accent)">—</div>
+            <div class="stat-label">Avg Quiz Score</div>
+            <div class="stat-sub">across all attempts</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ring">
+            <svg width="54" height="54" viewBox="0 0 54 54">
+              <circle class="stat-ring-track" cx="27" cy="27" r="22"/>
+              <circle class="stat-ring-fill" id="ring-weak" cx="27" cy="27" r="22" stroke="#e07070" stroke-dasharray="138.2" stroke-dashoffset="138.2"/>
+            </svg>
+            <div class="stat-ring-label" id="ring-weak-label">—</div>
+          </div>
+          <div>
+            <div class="stat-value" id="weak-count" style="color:var(--error)">—</div>
+            <div class="stat-label">Weak Topics</div>
+            <div class="stat-sub">need more practice</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ring">
+            <svg width="54" height="54" viewBox="0 0 54 54">
+              <circle class="stat-ring-track" cx="27" cy="27" r="22"/>
+              <circle class="stat-ring-fill" id="ring-risk" cx="27" cy="27" r="22" stroke="#e8a94b" stroke-dasharray="138.2" stroke-dashoffset="138.2"/>
+            </svg>
+            <div class="stat-ring-label" id="ring-risk-label">—</div>
+          </div>
+          <div>
+            <div class="stat-value" id="risk-score" style="color:var(--warning)">—</div>
+            <div class="stat-label">Risk Score</div>
+            <div class="stat-sub">lower is better</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">Quick actions</div>
+      <div class="cards-grid">
+
+        <a href="chat.html" class="action-card ac-gold">
+          <div class="ac-icon">🤖</div>
+          <div class="ac-title">AI Tutor Chat</div>
+          <div class="ac-desc">Ask questions, get explanations tailored to your learning level.</div>
+          <div class="ac-arrow">Open chat →</div>
+        </a>
+
+        <a href="quiz.html" class="action-card ac-blue">
+          <div class="ac-icon">📝</div>
+          <div class="ac-title">Take a Quiz</div>
+          <div class="ac-desc">Test your knowledge and track your score over time.</div>
+          <div class="ac-arrow">Start quiz →</div>
+        </a>
+
+        <a href="quiz-history.html" class="action-card ac-teal">
+          <div class="ac-icon">📋</div>
+          <div class="ac-title">Quiz History</div>
+          <div class="ac-desc">Review past quizzes, answers, and AI feedback.</div>
+          <div class="ac-arrow">View history →</div>
+        </a>
+
+        <a href="chat-history.html" class="action-card ac-green">
+          <div class="ac-icon">💬</div>
+          <div class="ac-title">Chat History</div>
+          <div class="ac-desc">Resume or review past tutoring conversations.</div>
+          <div class="ac-arrow">Browse sessions →</div>
+        </a>
+
+        <a href="progress.html" class="action-card ac-gold">
+          <div class="ac-icon">📊</div>
+          <div class="ac-title">My Progress</div>
+          <div class="ac-desc">Detailed breakdown of scores, weak topics, and risk score.</div>
+          <div class="ac-arrow">View progress →</div>
+        </a>
+
+        <a href="profile.html" class="action-card ac-purple">
+          <div class="ac-icon">👤</div>
+          <div class="ac-title">My Profile</div>
+          <div class="ac-desc">Set your level, preferred subjects, and learning style.</div>
+          <div class="ac-arrow">Edit profile →</div>
+        </a>
+
+        <div class="action-card ac-red" onclick="toggleWeakTopics()">
+          <div class="ac-icon">⚠️</div>
+          <div class="ac-title">Weak Topics</div>
+          <div class="ac-desc">See exactly where you need to focus your study time.</div>
+          <div class="ac-arrow">Review →</div>
+        </div>
+
+      </div>
+
+      <div class="weak-panel" id="weak-topics-box">
+        <h3>Topics needing attention</h3>
+        <div id="weak-topics-list"><span class="empty-state">Loading…</span></div>
+      </div>
+
+      <div class="activity-row" style="margin-top:28px;">
+        <div class="activity-feed">
+          <div class="af-header">Recent activity</div>
+          <div class="af-item">
+            <div class="af-dot" style="background:var(--success)"></div>
+            <div>
+              <div class="af-text">Completed <strong>Data Structures</strong> quiz — scored well</div>
+              <div class="af-time">2 hours ago</div>
+            </div>
+          </div>
+          <div class="af-item">
+            <div class="af-dot" style="background:var(--accent)"></div>
+            <div>
+              <div class="af-text">Chatted with AI Tutor about <strong>recursion concepts</strong></div>
+              <div class="af-time">Yesterday</div>
+            </div>
+          </div>
+          <div class="af-item">
+            <div class="af-dot" style="background:var(--info)"></div>
+            <div>
+              <div class="af-text">Uploaded <strong>OS lecture notes.pdf</strong> to course material</div>
+              <div class="af-time">2 days ago</div>
+            </div>
+          </div>
+          <div class="af-item">
+            <div class="af-dot" style="background:var(--error)"></div>
+            <div>
+              <div class="af-text">Flagged <strong>Dynamic Programming</strong> as a weak topic</div>
+              <div class="af-time">3 days ago</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tip-card">
+          <div class="tip-label">✦ Daily nudge</div>
+          <div class="tip-text" id="daily-tip">"Spaced repetition is one of the most evidence-backed ways to retain what you learn. Try revisiting a topic after 24 hours."</div>
+          <button class="tip-action" onclick="newTip()">New tip ↻</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    const API   = "http://localhost:8000"
+    const token = localStorage.getItem("token")
+    const name  = localStorage.getItem("name") || "Student"
+
+    if (!token) window.location.href = "index.html"
+
+    document.getElementById("nav-name").textContent    = name
+    document.getElementById("nav-avatar").textContent  = name.charAt(0).toUpperCase()
+
+    const hour     = new Date().getHours()
+    const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening"
+    document.querySelector(".nav-welcome").innerHTML   = `${greeting}, <strong>${name}</strong>`
+    document.getElementById("page-subtitle").textContent = `${greeting}, ${name.split(" ")[0]}. Here's how your learning is going.`
+
+    function setRing(id, labelId, pct) {
+      const circ   = 138.2
+      const offset = circ - (pct / 100) * circ
+      setTimeout(() => { document.getElementById(id).style.strokeDashoffset = offset }, 100)
+      document.getElementById(labelId).textContent = Math.round(pct) + "%"
+    }
+
+    async function loadProfile() {
+      try {
+        const res  = await fetch(`${API}/student/profile`, { headers: { "Authorization": "Bearer " + token }})
+        if (res.status === 401) { logout(); return }
+        const data = await res.json()
+
+        const score     = +(data.avg_score  || 0)
+        const weakCount = (data.weak_topics || []).length
+        const risk      = +(data.risk_score || 0)
+
+        document.getElementById("avg-score").textContent  = score.toFixed(0) + "%"
+        document.getElementById("weak-count").textContent = weakCount
+        document.getElementById("risk-score").textContent = risk.toFixed(0)
+        document.getElementById("weak-badge").textContent = weakCount
+
+        setRing("ring-score", "ring-score-label", score)
+        setRing("ring-weak",  "ring-weak-label",  Math.min(weakCount * 10, 100))
+        setRing("ring-risk",  "ring-risk-label",  risk)
+
+      } catch(e) {
+        ["avg-score","weak-count","risk-score"].forEach(id => document.getElementById(id).textContent = "0")
+        document.getElementById("weak-badge").textContent = "0"
+        setRing("ring-score","ring-score-label",0)
+        setRing("ring-weak", "ring-weak-label", 0)
+        setRing("ring-risk", "ring-risk-label", 0)
+      }
+    }
+
+    let weakOpen = false
+    function toggleWeakTopics() {
+      weakOpen = !weakOpen
+      document.getElementById("weak-topics-box").classList.toggle("open", weakOpen)
+      if (!weakOpen) return
+
+      fetch(`${API}/student/profile`, { headers: { "Authorization": "Bearer " + token }})
+        .then(r => r.json())
+        .then(data => {
+          const topics = data.weak_topics || []
+          document.getElementById("weak-topics-list").innerHTML = topics.length
+            ? topics.map(t => {
+                const label = typeof t === "object" ? `${t.topic} (${t.subject})` : t
+                return `<span class="weak-tag">⚠ ${label}</span>`
+              }).join("")
+            : `<span class="empty-state">No weak topics yet — keep it up!</span>`
+        })
+        .catch(() => {
+          document.getElementById("weak-topics-list").innerHTML = `<span class="empty-state">Could not load topics.</span>`
+        })
+    }
+
+    const tips = [
+      '"Spaced repetition is one of the most evidence-backed ways to retain what you learn. Try revisiting a topic after 24 hours."',
+      '"Teaching a concept out loud — even to yourself — forces your brain to identify gaps in understanding."',
+      '"Short, focused 25-minute sessions beat long, distracted hours of studying every time."',
+      '"If a quiz question surprises you, that topic is exactly where you should spend time next."',
+      '"Connecting new ideas to things you already know makes memories stick far longer."',
+    ]
+    let tipIdx = 0
+    function newTip() {
+      tipIdx = (tipIdx + 1) % tips.length
+      document.getElementById("daily-tip").textContent = tips[tipIdx]
+    }
+
+    function logout() { localStorage.clear(); window.location.href = "index.html" }
+
+    loadProfile()
+  </script>
+</body>
+</html>

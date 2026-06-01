@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Professor Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --bg:#1a1814;
+      --bg-card:#211f1b;
+      --bg-elevated:#2a2723;
+      --bg-input:#252320;
+      --border:rgba(255,255,255,0.08);
+      --border-hover:rgba(212,168,75,0.3);
+      --text-primary:#f0ebe0;
+      --text-secondary:#9e9890;
+      --text-muted:#5c5850;
+      --accent:#d4a84b;
+      --accent-glow:rgba(212,168,75,0.16);
+      --accent-hover:#e8c06a;
+      --success:#6ec98a;
+      --warning:#e8a94b;
+      --error:#e07070;
+      --info:#6ab0e8;
+      --radius:12px;
+      --transition:0.2s cubic-bezier(0.4,0,0.2,1);
+      --shadow-card:0 10px 34px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.04) inset;
+    }
+
+    body {
+      font-family:'DM Sans',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      background:var(--bg) !important;
+      color:var(--text-primary);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    body::before, body::after {
+      content:'';
+      position:fixed;
+      border-radius:50%;
+      filter:blur(100px);
+      pointer-events:none;
+      z-index:-1;
+      opacity:0.16;
+    }
+
+    body::before {
+      width:500px;
+      height:500px;
+      background:radial-gradient(circle,#c47d1a,transparent 70%);
+      top:-150px;
+      left:-100px;
+    }
+
+    body::after {
+      width:420px;
+      height:420px;
+      background:radial-gradient(circle,#2a5c8a,transparent 70%);
+      bottom:-120px;
+      right:-90px;
+    }
+
+    .prof-wrap {
+      max-width:1120px;
+      margin:0 auto;
+      padding:28px 18px 44px;
+      position:relative;
+      z-index:1;
+    }
+
+    nav {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      margin-bottom:18px !important;
+      padding:18px 20px;
+      background:rgba(33,31,27,0.76);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      backdrop-filter:blur(16px);
+      box-shadow:var(--shadow-card);
+    }
+
+    nav h2 {
+      font-family:'Lora',Georgia,serif;
+      color:var(--text-primary);
+      font-size:1.45rem;
+      font-weight:600;
+      letter-spacing:0;
+    }
+
+    #prof-name, nav span { color:var(--text-secondary) !important; }
+
+    nav a {
+      color:var(--accent) !important;
+      background:var(--bg-elevated) !important;
+      border:1px solid var(--border) !important;
+      box-shadow:none !important;
+      border-radius:8px !important;
+      transition:background var(--transition),border-color var(--transition),color var(--transition);
+    }
+
+    nav a:hover {
+      color:var(--accent-hover) !important;
+      border-color:var(--border-hover) !important;
+      background:var(--accent-glow) !important;
+    }
+
+    .logout, .btn, button { font-family:'DM Sans',system-ui,sans-serif; }
+
+    .logout {
+      padding:8px 15px;
+      border:1px solid rgba(224,112,112,0.24);
+      background:rgba(224,112,112,0.1);
+      color:var(--error);
+      border-radius:8px;
+      cursor:pointer;
+      font-size:0.86rem;
+      font-weight:500;
+      transition:background var(--transition),border-color var(--transition);
+    }
+
+    .logout:hover { background:rgba(224,112,112,0.18); border-color:rgba(224,112,112,0.4); }
+
+    .tabs {
+      display:flex;
+      gap:5px;
+      background:var(--bg-card) !important;
+      padding:6px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      box-shadow:var(--shadow-card) !important;
+      margin-bottom:22px;
+      overflow-x:auto;
+    }
+
+    .tab-btn {
+      flex:1;
+      min-width:max-content;
+      padding:10px 12px;
+      border:none;
+      border-radius:8px;
+      background:transparent;
+      cursor:pointer;
+      font-size:0.88rem;
+      color:var(--text-secondary);
+      transition:background var(--transition),color var(--transition);
+      white-space:nowrap;
+    }
+
+    .tab-btn:hover { background:var(--bg-elevated); color:var(--text-primary); }
+    .tab-btn.active { background:var(--accent-glow) !important; color:var(--accent) !important; font-weight:600; }
+
+    .tab-content { display:none; animation:fadeUp 0.35s ease both; }
+    .tab-content.active { display:block; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+    .stat-row {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+      gap:14px;
+      margin-bottom:22px;
+    }
+
+    .stat-box, .section, .modal, .risk-card, .modal-stat {
+      background:var(--bg-card) !important;
+      border:1px solid var(--border) !important;
+      color:var(--text-primary) !important;
+      box-shadow:var(--shadow-card) !important;
+    }
+
+    .stat-box {
+      border-radius:var(--radius) !important;
+      padding:20px 16px;
+      text-align:center;
+      transition:border-color var(--transition),transform var(--transition);
+    }
+
+    .stat-box:hover { border-color:var(--border-hover) !important; transform:translateY(-2px); }
+
+    .stat-box .num {
+      font-family:'Lora',Georgia,serif;
+      font-size:2rem;
+      font-weight:600;
+      color:var(--accent) !important;
+      line-height:1;
+    }
+
+    .stat-box .num.red { color:var(--error) !important; }
+    .stat-box .num.green { color:var(--success) !important; }
+    .stat-box .lbl, .modal-stat .l { color:var(--text-secondary) !important; font-size:0.78rem; margin-top:6px; }
+
+    .section {
+      border-radius:var(--radius) !important;
+      padding:24px;
+      margin-bottom:20px;
+    }
+
+    .section h3, .section h4, .modal-header h2 {
+      font-family:'Lora',Georgia,serif;
+      color:var(--text-primary) !important;
+      font-weight:600;
+      margin-bottom:16px;
+    }
+
+    p, td, .risk-detail, .freq-label, .empty-state { color:var(--text-secondary) !important; }
+
+    table {
+      width:100%;
+      border-collapse:collapse;
+      font-size:0.85rem;
+      background:var(--bg-card);
+    }
+
+    th {
+      text-align:left;
+      padding:11px 12px;
+      background:var(--bg-elevated) !important;
+      color:var(--text-secondary) !important;
+      font-weight:600;
+      border-bottom:1px solid var(--border) !important;
+      white-space:nowrap;
+    }
+
+    td {
+      padding:11px 12px;
+      border-bottom:1px solid var(--border) !important;
+      color:var(--text-secondary) !important;
+      vertical-align:middle;
+    }
+
+    td strong, .risk-name { color:var(--text-primary) !important; }
+    tr:last-child td { border-bottom:none !important; }
+    tr.clickable { cursor:pointer; }
+    tr.clickable:hover td { background:var(--bg-elevated) !important; }
+
+    .pill, .tag-sm {
+      display:inline-block;
+      border-radius:20px;
+      border:1px solid transparent;
+      font-weight:600;
+    }
+
+    .pill { padding:3px 10px; font-size:0.78rem; }
+    .tag-sm { padding:3px 9px; font-size:0.72rem; margin:2px; }
+
+    .pill.high, .tag-sm { background:rgba(224,112,112,0.12) !important; color:var(--error) !important; border-color:rgba(224,112,112,0.22); }
+    .pill.mid { background:rgba(232,169,75,0.12) !important; color:var(--warning) !important; border-color:rgba(232,169,75,0.22); }
+    .pill.low { background:rgba(110,201,138,0.12) !important; color:var(--success) !important; border-color:rgba(110,201,138,0.22); }
+    .pill.level { background:var(--accent-glow) !important; color:var(--accent) !important; border-color:rgba(212,168,75,0.24); }
+
+    .freq-row { margin-bottom:13px; }
+    .freq-label { display:flex; justify-content:space-between; gap:14px; font-size:0.85rem; margin-bottom:6px; }
+    .freq-bg { background:var(--bg-elevated) !important; border-radius:8px; height:9px; overflow:hidden; }
+    .freq-fill { height:100%; background:var(--error) !important; border-radius:8px; transition:width 0.6s; }
+
+    .risk-card {
+      border-color:rgba(224,112,112,0.22) !important;
+      border-radius:10px;
+      padding:16px;
+      margin-bottom:12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+    }
+
+    .risk-badge {
+      background:rgba(224,112,112,0.14) !important;
+      color:var(--error) !important;
+      border:1px solid rgba(224,112,112,0.28);
+      font-weight:800;
+      font-size:1.05rem;
+      padding:8px 14px;
+      border-radius:8px;
+      white-space:nowrap;
+    }
+
+    input, select, textarea, input[type='file'] {
+      width:100%;
+      padding:11px 13px;
+      background:var(--bg-input) !important;
+      border:1px solid var(--border) !important;
+      border-radius:9px !important;
+      color:var(--text-primary) !important;
+      font-size:0.9rem;
+      outline:none;
+      transition:border-color var(--transition),box-shadow var(--transition);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color:var(--accent) !important;
+      box-shadow:0 0 0 3px var(--accent-glow);
+    }
+
+    input::placeholder { color:var(--text-muted); }
+
+    .btn, #eval-btn, #pdf-upload-btn, #curr-upload-btn {
+      background:var(--accent) !important;
+      color:#1a1510 !important;
+      border:none !important;
+      border-radius:9px !important;
+      padding:10px 18px;
+      cursor:pointer;
+      font-weight:700;
+      transition:background var(--transition),transform var(--transition),opacity var(--transition);
+    }
+
+    .btn:hover, #eval-btn:hover, #pdf-upload-btn:hover, #curr-upload-btn:hover { background:var(--accent-hover) !important; transform:translateY(-1px); }
+    button:disabled { opacity:0.65; cursor:not-allowed; transform:none !important; }
+
+    #pdf-chosen, #curr-chosen {
+      background:var(--accent-glow) !important;
+      color:var(--accent) !important;
+      border:1px solid rgba(212,168,75,0.24);
+    }
+
+    pre {
+      background:#14120f !important;
+      color:var(--success) !important;
+      border:1px solid var(--border);
+      border-radius:9px !important;
+    }
+
+    .modal-overlay {
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.62) !important;
+      z-index:100;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+
+    .modal-overlay.open { display:flex; }
+
+    .modal {
+      border-radius:16px !important;
+      padding:28px;
+      width:90%;
+      max-width:660px;
+      max-height:85vh;
+      overflow-y:auto;
+    }
+
+    .modal-header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:20px; }
+
+    .close-btn {
+      background:var(--bg-elevated) !important;
+      border:1px solid var(--border) !important;
+      border-radius:8px !important;
+      padding:7px 12px;
+      cursor:pointer;
+      color:var(--text-secondary) !important;
+    }
+
+    .close-btn:hover { color:var(--text-primary) !important; border-color:var(--border-hover) !important; }
+
+    .modal-stats {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+      margin-bottom:20px;
+    }
+
+    .modal-stat { text-align:center; border-radius:9px !important; padding:13px 8px; box-shadow:none !important; }
+    .modal-stat .n { font-family:'Lora',Georgia,serif; font-size:1.4rem; font-weight:600; color:var(--accent) !important; }
+
+    canvas { width:100% !important; max-height:190px; }
+    .empty-state { text-align:center; padding:32px; font-size:0.9rem; }
+
+    @media(max-width:760px) {
+      .prof-wrap { padding:18px 12px 32px; }
+      nav { align-items:flex-start; flex-direction:column; }
+      nav > div { flex-wrap:wrap; }
+      .tabs { justify-content:flex-start; }
+      .tab-btn { flex:0 0 auto; }
+      .section { padding:18px; overflow-x:auto; }
+      .eval-row { flex-direction:column; }
+      .modal-stats { grid-template-columns:1fr; }
+      table { min-width:760px; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="prof-wrap">
+
+  <nav style="margin-bottom:16px;">
+    <h2>🎓 Professor Dashboard</h2>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <span id="prof-name" style="color:#666; font-size:0.9rem;"></span>
+      <a href="exams.html" style="color:#4f46e5; text-decoration:none; font-size:0.9rem; background:white; padding:8px 14px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+  📋 Exam Marks
+</a>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('overview')">📊 Overview</button>
+    <button class="tab-btn" onclick="switchTab('students')">👥 All Students</button>
+    <button class="tab-btn" onclick="switchTab('risk')">🚨 At-Risk Alerts</button>
+    <button class="tab-btn" onclick="switchTab('material')">📚 Course Material</button>
+    <button class="tab-btn" onclick="switchTab('curriculum')">Curriculum</button>
+  </div>
+
+  <!-- TAB: Overview -->
+  <div id="tab-overview" class="tab-content active">
+
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="num" id="total-students">--</div>
+        <div class="lbl">Total Students</div>
+      </div>
+      <div class="stat-box">
+        <div class="num red" id="at-risk-count">--</div>
+        <div class="lbl">At Risk (score &gt; 70)</div>
+      </div>
+      <div class="stat-box">
+        <div class="num green" id="class-avg">--</div>
+        <div class="lbl">Class Avg Score</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>⚠️ Most common weak topics across all students</h3>
+      <div id="weak-topic-bars">
+        <div class="empty-state">Loading...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TAB: All Students -->
+  <div id="tab-students" class="tab-content">
+
+    <div class="section" style="padding:0; overflow:hidden;">
+      <table>
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Level</th>
+            <th>Avg Score</th>
+            <th>Risk Score</th>
+            <th>Weak Topics</th>
+            <th>Quizzes</th>
+            <th>Last Active</th>
+          </tr>
+        </thead>
+        <tbody id="students-tbody">
+          <tr><td colspan="7" style="text-align:center; color:#aaa; padding:32px;">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- TAB: At-Risk -->
+  <div id="tab-risk" class="tab-content">
+
+    <p style="font-size:0.85rem; color:#666; margin-bottom:16px;">
+      Students with risk score above 70. Sorted by highest risk first.
+    </p>
+    <div id="risk-list">
+      <div class="empty-state">Loading...</div>
+    </div>
+
+  </div>
+  <div id="tab-material" class="tab-content">
+  <div class="section">
+    <h3>Upload course material</h3>
+    <p style="font-size:0.85rem; color:#666; margin-bottom:16px;">
+      PDFs uploaded here are embedded into the AI knowledge base.
+      Students cannot upload material.
+    </p>
+
+    <input type="file" id="pdf-input" accept=".pdf"
+      style="margin-bottom:14px; font-size:0.9rem;"
+      onchange="handlePDF(event)" />
+
+    <div id="pdf-chosen" style="display:none; margin-bottom:14px;
+      background:#ede9fe; padding:10px 14px; border-radius:8px;
+      font-size:0.88rem; color:#4f46e5;">
+    </div>
+    
+    <div class="section" style="margin-top:20px;">
+  <h3>RAG Evaluation</h3>
+  <p style="font-size:0.85rem; color:#666; margin-bottom:12px;">
+    Test how well the AI retrieves and uses course material.
+    Enter sample questions from your uploaded PDFs.
+  </p>
+
+  <div id="eval-questions">
+    <div class="eval-row" style="display:flex; gap:8px; margin-bottom:8px;">
+      <input type="text" class="eval-q"
+        placeholder="Question from course material..."
+        style="flex:1; margin:0; font-size:0.85rem;" />
+      <input type="text" class="eval-gt"
+        placeholder="Expected answer (optional)..."
+        style="flex:1; margin:0; font-size:0.85rem;" />
+    </div>
+  </div>
+
+  <div style="display:flex; gap:8px; margin-top:8px;">
+    <button
+      onclick="addEvalRow()"
+      style="background:#e2e8f0; color:#333; border:none;
+      border-radius:8px; padding:8px 16px; cursor:pointer;
+      font-size:0.85rem;">
+      + Add question
+    </button>
+    <button
+      class="btn"
+      onclick="runEvaluation()"
+      id="eval-btn"
+      style="width:auto; padding:8px 20px;">
+      Run Evaluation
+    </button>
+  </div>
+
+  <div id="eval-results" style="display:none; margin-top:16px;">
+    <div style="display:grid; grid-template-columns:repeat(2,1fr);
+      gap:12px;">
+      <div class="stat-box">
+        <div class="num" id="eval-faithfulness">--</div>
+        <div class="lbl">Faithfulness</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="eval-relevancy">--</div>
+        <div class="lbl">Answer Relevancy</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="eval-precision">--</div>
+        <div class="lbl">Context Precision</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="eval-recall">--</div>
+        <div class="lbl">Context Recall</div>
+      </div>
+    </div>
+    <p style="font-size:0.75rem; color:#888; margin-top:10px;">
+      Scores are 0-1. Higher is better.
+    </p>
+  </div>
+
+  <div id="eval-msg" style="font-size:0.85rem; margin-top:10px;"></div>
+</div>
+
+
+    <button class="btn" id="pdf-upload-btn" onclick="uploadPDF()"
+      style="display:none;">
+      Upload and Embed
+    </button>
+
+    <div id="pdf-msg" style="margin-top:12px; font-size:0.88rem;"></div>
+
+    <div style="margin-top:24px;">
+      <h4 style="margin-bottom:12px; color:#1a1a2e; font-size:0.9rem;">
+        Uploaded files
+      </h4>
+      <div id="pdf-list">Loading...</div>
+    </div>
+  </div>
+</div>
+
+</div>
+<div id="tab-curriculum" class="tab-content">
+
+  <div class="section">
+    <h3>Upload curriculum</h3>
+    <p style="font-size:0.85rem; color:#666; margin-bottom:10px;">
+      Upload a .txt file in this exact format:
+    </p>
+    <pre style="background:#1a1a2e; color:#a5f3a5; padding:14px;
+      border-radius:8px; font-size:0.78rem; margin-bottom:16px;
+      overflow-x:auto;">Subject: Data Structures
+Topics: Arrays, Linked Lists, Stacks, Queues, Trees, Graphs
+
+Subject: Algorithms
+Topics: Sorting, Searching, Recursion, Dynamic Programming
+
+Subject: Mathematics
+Topics: Calculus, Linear Algebra, Probability, Statistics</pre>
+
+    <input
+      type="file"
+      id="curr-input"
+      accept=".txt"
+      onchange="handleCurrFile(event)"
+      style="font-size:0.88rem; margin-bottom:12px; display:block;"
+    />
+
+    <div id="curr-chosen"
+      style="display:none; background:#ede9fe; color:#4f46e5;
+      padding:8px 14px; border-radius:8px; font-size:0.85rem;
+      margin-bottom:12px;">
+    </div>
+
+    <button
+      class="btn"
+      id="curr-upload-btn"
+      onclick="uploadCurriculum()"
+      style="display:none;"
+    >
+      Upload Curriculum
+    </button>
+
+    <div id="curr-msg"
+      style="margin-top:10px; font-size:0.85rem;">
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Current curriculum</h3>
+    <div id="curr-list">
+      <p style="color:#aaa; font-size:0.85rem;">Loading...</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Student drilldown modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <h2 id="modal-name">Student Name</h2>
+      <button class="close-btn" onclick="closeModalDirect()">✕ Close</button>
+    </div>
+
+    <div class="modal-stats">
+      <div class="modal-stat">
+        <div class="n" id="modal-avg">--</div>
+        <div class="l">Avg Score</div>
+      </div>
+      <div class="modal-stat">
+        <div class="n" id="modal-risk">--</div>
+        <div class="l">Risk Score</div>
+      </div>
+      <div class="modal-stat">
+        <div class="n" id="modal-attempts">--</div>
+        <div class="l">Quizzes Taken</div>
+      </div>
+    </div>
+
+    <p style="font-size:0.8rem; color:#888; margin-bottom:6px;">
+      Level: <span id="modal-level" style="color:#4f46e5; font-weight:600;"></span>
+      &nbsp;·&nbsp; Last active: <span id="modal-last-active"></span>
+    </p>
+
+    <div style="margin: 14px 0 6px;">
+      <p style="font-size:0.82rem; color:#888; margin-bottom:6px;">⚠️ Weak topics</p>
+      <div id="modal-weak"></div>
+    </div>
+
+    
+
+    <p style="font-size:0.85rem; font-weight:600; color:#1a1a2e; margin-bottom:10px;">
+      Score history
+    </p>
+    <canvas id="modal-chart"></canvas>
+
+    <div style="margin-top:16px;">
+      <p style="font-size:0.85rem; font-weight:600; color:#1a1a2e; margin-bottom:10px;">
+        Performance by topic
+      </p>
+      <div id="modal-topic-bars"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+<script>
+  const API = "http://localhost:8000"
+  const token = localStorage.getItem("token")
+  const role = localStorage.getItem("role")
+  const name = localStorage.getItem("name")
+
+  if (!token || role !== "professor") window.location.href = "index.html"
+
+  document.getElementById("prof-name").textContent = name || ""
+
+  let modalChart = null
+
+  // ── Tabs ────────────────────────────────────────
+  function switchTab(tab) {
+    document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"))
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"))
+    document.getElementById("tab-" + tab).classList.add("active")
+    event.target.classList.add("active")
+
+    if (tab === "students") loadStudents()
+    if (tab === "risk") loadAtRisk()
+    if (tab === "material") loadPDFList()
+    if (tab === "curriculum") loadCurriculumList()
+  }
+
+  // ── Overview ────────────────────────────────────
+  async function loadOverview() {
+    try {
+      const res = await fetch(`${API}/professor/overview`, {
+        headers: { "Authorization": "Bearer " + token }
+      })
+      if (res.status === 401) { logout(); return; }
+      if (res.status === 403) {
+        alert("Professor access only")
+        window.location.href = "index.html"
+        return
+      }
+      const d = await res.json()
+
+      document.getElementById("total-students").textContent = d.total_students
+      document.getElementById("at-risk-count").textContent = d.at_risk_count
+      document.getElementById("class-avg").textContent = d.class_avg_score + "%"
+
+      // Weak topic frequency bars
+      const container = document.getElementById("weak-topic-bars")
+      if (!d.top_weak_topics || d.top_weak_topics.length === 0) {
+        container.innerHTML = `<div class="empty-state">No weak topic data yet.</div>`
+        return
+      }
+
+      const max = d.top_weak_topics[0].count
+      container.innerHTML = d.top_weak_topics.map(t => `
+        <div class="freq-row">
+          <div class="freq-label">
+            <span>${t.topic}</span>
+            <span style="font-weight:600; color:#e53e3e;">${t.count} student${t.count > 1 ? 's' : ''}</span>
+          </div>
+          <div class="freq-bg">
+            <div class="freq-fill" style="width:${(t.count / max) * 100}%"></div>
+          </div>
+        </div>`).join("")
+
+    } catch(e) {
+      console.error("Overview load failed:", e)
+    }
+  }
+
+  // ── All Students ────────────────────────────────
+  async function loadStudents() {
+    try {
+      const res = await fetch(`${API}/professor/students`, {
+        headers: { "Authorization": "Bearer " + token }
+      })
+      const students = await res.json()
+      const tbody = document.getElementById("students-tbody")
+
+      if (!students || students.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#aaa; padding:32px;">No students registered yet.</td></tr>`
+        return
+      }
+
+      tbody.innerHTML = students.map(s => {
+        const riskClass = s.risk_score > 70 ? "high" : s.risk_score > 40 ? "mid" : "low"
+        const scoreClass = s.avg_score >= 70 ? "low" : s.avg_score >= 50 ? "mid" : "high"
+        const weakTags = (s.weak_topics || []).slice(0, 2)
+          .map(t => `<span class="tag-sm">${t}</span>`).join("") || "-"
+
+        return `<tr class="clickable" onclick="openDrilldown(${s.id})">
+          <td><strong>${s.name}</strong><br><span style="color:#888; font-size:0.75rem;">${s.email}</span></td>
+          <td><span class="pill level">${s.level}</span></td>
+          <td><span class="pill ${scoreClass}">${s.avg_score}%</span></td>
+          <td><span class="pill ${riskClass}">${s.risk_score}</span></td>
+          <td>${weakTags}</td>
+          <td>${s.attempt_count}</td>
+          <td style="font-size:0.8rem; color:#888;">${s.last_active}</td>
+        </tr>`
+      }).join("")
+
+    } catch(e) {
+      console.error("Students load failed:", e)
+    }
+  }
+
+  // ── At-Risk ─────────────────────────────────────
+  async function loadAtRisk() {
+    try {
+      const res = await fetch(`${API}/professor/at-risk`, {
+        headers: { "Authorization": "Bearer " + token }
+      })
+      const list = await res.json()
+      const container = document.getElementById("risk-list")
+
+      if (!list || list.length === 0) {
+        container.innerHTML = `<div class="empty-state">🎉 No at-risk students right now!</div>`
+        return
+      }
+
+      container.innerHTML = list.map(s => `
+        <div class="risk-card">
+          <div>
+            <div class="risk-name">${s.name}</div>
+            <div class="risk-detail">
+              ${s.email} &nbsp;·&nbsp;
+              Avg score: <strong>${s.avg_score}%</strong> &nbsp;·&nbsp;
+              Inactive: <strong>${s.days_inactive} days</strong>
+            </div>
+            <div style="margin-top:8px;">
+              ${(s.weak_topics || []).map(t =>
+                `<span class="tag-sm">${t}</span>`).join("") || "No weak topics recorded"}
+            </div>
+          </div>
+          <div class="risk-badge">${s.risk_score}</div>
+        </div>`).join("")
+
+    } catch(e) {
+      console.error("At-risk load failed:", e)
+    }
+  }
+
+  // ── Student drilldown modal ─────────────────────
+  async function openDrilldown(studentId) {
+    try {
+      const res = await fetch(`${API}/professor/student/${studentId}`, {
+        headers: { "Authorization": "Bearer " + token }
+      })
+      const d = await res.json()
+
+      document.getElementById("modal-name").textContent = d.name
+      document.getElementById("modal-avg").textContent = d.avg_score + "%"
+      document.getElementById("modal-risk").textContent = d.risk_score
+      document.getElementById("modal-attempts").textContent = d.attempt_count
+      document.getElementById("modal-level").textContent = d.level
+      document.getElementById("modal-last-active").textContent = d.last_active
+
+     const weakEl = document.getElementById("modal-weak")
+
+weakEl.innerHTML = (d.weak_topics || []).length
+  ? d.weak_topics.map(w => {
+      const label =
+        typeof w === "object"
+          ? `${w.topic} (${w.subject})`
+          : w
+
+      return `<span class="tag-sm">${label}</span>`
+    }).join("")
+  : `<span style="color:#aaa;font-size:0.82rem;">None</span>`
+
+      // Score history chart
+      renderModalChart(d.score_history || [])
+
+      // Topic bars
+      renderModalTopicBars(d.topic_avg || {})
+
+      document.getElementById("modal-overlay").classList.add("open")
+
+    } catch(e) {
+      console.error("Drilldown failed:", e)
+    }
+  }
+
+  function renderModalChart(history) {
+    if (modalChart) { modalChart.destroy(); modalChart = null; }
+    if (!history || history.length === 0) return
+
+    const ctx = document.getElementById("modal-chart").getContext("2d")
+    modalChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: history.map(h => `#${h.attempt} ${h.topic}`),
+        datasets: [{
+          data: history.map(h => h.score),
+          borderColor: "#4f46e5",
+          backgroundColor: "rgba(79,70,229,0.07)",
+          borderWidth: 2,
+          pointRadius: 4,
+          tension: 0.35,
+          fill: true,
+          pointBackgroundColor: history.map(h =>
+            h.score >= 80 ? "#38a169" : h.score >= 60 ? "#d69e2e" : "#e53e3e"
+          )
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: {
+            min: 0, max: 100,
+            ticks: { callback: v => v + "%" , font: { size: 10 } },
+            grid: { color: "#f1f5f9" }
+          },
+          x: { ticks: { font: { size: 9 }, maxRotation: 30 }, grid: { display: false } }
+        }
+      }
+    })
+  }
+
+  function renderModalTopicBars(topicAvg) {
+    const container = document.getElementById("modal-topic-bars")
+    const topics = Object.entries(topicAvg)
+    if (topics.length === 0) {
+      container.innerHTML = `<span style="color:#aaa; font-size:0.82rem;">No quiz data yet.</span>`
+      return
+    }
+    topics.sort((a, b) => a[1] - b[1])
+    container.innerHTML = topics.map(([topic, avg]) => {
+      const color = avg >= 80 ? "#38a169" : avg >= 60 ? "#d69e2e" : "#e53e3e"
+      return `
+        <div class="freq-row">
+          <div class="freq-label">
+            <span style="font-size:0.82rem;">${topic}</span>
+            <span style="font-weight:600; color:${color}; font-size:0.82rem;">${avg}%</span>
+          </div>
+          <div class="freq-bg">
+            <div class="freq-fill" style="width:${avg}%; background:${color};"></div>
+          </div>
+        </div>`
+    }).join("")
+  }
+
+
+  function closeModal(e) {
+    if (e.target === document.getElementById("modal-overlay")) {
+      closeModalDirect()
+    }
+  }
+
+  function closeModalDirect() {
+    document.getElementById("modal-overlay").classList.remove("open")
+    if (modalChart) { modalChart.destroy(); modalChart = null; }
+  }
+
+  function logout() {
+    localStorage.clear()
+    window.location.href = "index.html"
+  }
+  
+
+  // Load overview on start
+  loadOverview()
+  let selectedPDF = null
+
+function handlePDF(e) {
+  selectedPDF = e.target.files[0]
+  if (!selectedPDF) return
+  document.getElementById("pdf-chosen").style.display = "block"
+  document.getElementById("pdf-chosen").textContent = selectedPDF.name
+  document.getElementById("pdf-upload-btn").style.display = "block"
+}
+
+async function uploadPDF() {
+  if (!selectedPDF) return
+  const btn = document.getElementById("pdf-upload-btn")
+  btn.disabled = true
+  btn.textContent = "Uploading..."
+  const msg = document.getElementById("pdf-msg")
+
+  const formData = new FormData()
+  formData.append("file", selectedPDF)
+
+  try {
+    const res = await fetch(`${API}/upload-pdf`, {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + token },
+      body: formData
+    })
+    const data = await res.json()
+    msg.style.color = res.ok ? "#276749" : "#c53030"
+    msg.textContent = res.ok ? data.message : (data.detail || "Upload failed")
+    if (res.ok) loadPDFList()
+  } catch(e) {
+    msg.style.color = "#c53030"
+    msg.textContent = "Cannot reach server."
+  }
+
+  btn.disabled = false
+  btn.textContent = "Upload and Embed"
+}
+
+async function loadPDFList() {
+  try {
+    const res = await fetch(`${API}/uploaded-pdfs`, {
+      headers: { "Authorization": "Bearer " + token }
+    })
+    const data = await res.json()
+    const container = document.getElementById("pdf-list")
+    if (!data.files || data.files.length === 0) {
+      container.innerHTML = `<p style="color:#aaa; font-size:0.85rem;">No files uploaded yet.</p>`
+      return
+    }
+    container.innerHTML = data.files.map(f => `
+      <div style="padding:8px 0; border-bottom:1px solid var(--border);
+        font-size:0.85rem; display:flex; justify-content:space-between;">
+        <span>${f}</span>
+        <span style="color:#38a169; font-size:0.78rem;">Embedded</span>
+      </div>`).join("") +
+      `<p style="font-size:0.75rem; color:#aaa; margin-top:8px;">
+        ${data.chunks_in_db} chunks in knowledge base
+      </p>`
+  } catch(e) {}
+}
+let currFile = null
+function addEvalRow() {
+  const container = document.getElementById("eval-questions")
+  const row = document.createElement("div")
+  row.className = "eval-row"
+  row.style = "display:flex; gap:8px; margin-bottom:8px;"
+  row.innerHTML = `
+    <input type="text" class="eval-q"
+      placeholder="Question from course material..."
+      style="flex:1; margin:0; font-size:0.85rem;" />
+    <input type="text" class="eval-gt"
+      placeholder="Expected answer (optional)..."
+      style="flex:1; margin:0; font-size:0.85rem;" />
+  `
+  container.appendChild(row)
+}
+
+async function runEvaluation() {
+  const qs = document.querySelectorAll(".eval-q")
+  const gts = document.querySelectorAll(".eval-gt")
+  const questions = []
+
+  qs.forEach((q, i) => {
+    if (q.value.trim()) {
+      questions.push({
+        question: q.value.trim(),
+        ground_truth: gts[i]?.value.trim() || ""
+      })
+    }
+  })
+
+  if (questions.length === 0) {
+    document.getElementById("eval-msg").textContent =
+      "Add at least one question."
+    return
+  }
+
+  const btn = document.getElementById("eval-btn")
+  const msg = document.getElementById("eval-msg")
+  btn.disabled = true
+  btn.textContent = "Running..."
+  msg.textContent = "This may take 30-60 seconds..."
+  msg.style.color = "#4f46e5"
+
+  try {
+    const res = await fetch(`${API}/professor/evaluate-rag`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ questions })
+    })
+    const data = await res.json()
+
+    if (!res.ok) {
+      msg.style.color = "#c53030"
+      msg.textContent = data.detail || "Evaluation failed"
+      return
+    }
+
+    document.getElementById("eval-faithfulness").textContent =
+      data.faithfulness
+    document.getElementById("eval-relevancy").textContent =
+      data.answer_relevancy
+    document.getElementById("eval-precision").textContent =
+      data.context_precision
+    document.getElementById("eval-recall").textContent =
+      data.context_recall
+
+    document.getElementById("eval-results").style.display = "block"
+    msg.textContent = "Evaluation complete."
+    msg.style.color = "#276749"
+
+  } catch(e) {
+    msg.style.color = "#c53030"
+    msg.textContent = "Cannot reach server."
+  }
+
+  btn.disabled = false
+  btn.textContent = "Run Evaluation"
+}
+
+function handleCurrFile(e) {
+  currFile = e.target.files[0]
+  if (!currFile) return
+  document.getElementById("curr-chosen").style.display = "block"
+  document.getElementById("curr-chosen").textContent = currFile.name
+  document.getElementById("curr-upload-btn").style.display = "block"
+  document.getElementById("curr-msg").textContent = ""
+}
+
+async function uploadCurriculum() {
+  if (!currFile) return
+  const btn = document.getElementById("curr-upload-btn")
+  const msg = document.getElementById("curr-msg")
+  btn.disabled = true
+  btn.textContent = "Uploading..."
+
+  const formData = new FormData()
+  formData.append("file", currFile)
+
+  try {
+    const res = await fetch(`${API}/upload-curriculum`, {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + token },
+      body: formData
+    })
+    const data = await res.json()
+    msg.style.color = res.ok ? "#276749" : "#c53030"
+    msg.textContent = res.ok
+      ? data.message
+      : (data.detail || "Upload failed")
+    if (res.ok) {
+      loadCurriculumList()
+      document.getElementById("curr-chosen").style.display = "none"
+      document.getElementById("curr-upload-btn").style.display = "none"
+      document.getElementById("curr-input").value = ""
+      currFile = null
+    }
+  } catch(e) {
+    msg.style.color = "#c53030"
+    msg.textContent = "Cannot reach server."
+  }
+
+  btn.disabled = false
+  btn.textContent = "Upload Curriculum"
+}
+
+async function loadCurriculumList() {
+  const res = await fetch(`${API}/curriculum`, {
+    headers: { "Authorization": "Bearer " + token }
+  })
+  const data = await res.json()
+const curriculum = data.curriculum || []
+  console.log("data:", data)
+  
+  const container = document.getElementById("curr-list")
+  console.log("container:", container)
+  
+  if (curriculum.length === 0) {
+    container.innerHTML = `<p style="color:#aaa;">No curriculum yet.</p>`
+    return
+  }
+
+  container.innerHTML = curriculum.map(e => {
+    console.log("rendering entry:", e)
+    return `
+      <div style="border:1px solid var(--border); border-radius:10px;
+        padding:16px; margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between;
+          align-items:center; margin-bottom:10px;">
+          <strong>${e.subject}</strong>
+          <button onclick="deleteCurrEntry(${e.id})"
+            style="background:#fff5f5; color:#c53030; border:none;
+            border-radius:6px; padding:4px 10px; cursor:pointer;
+            font-size:0.75rem;">
+            Remove
+          </button>
+        </div>
+        <div>
+          ${(e.topics || []).map(t =>
+            `<span style="display:inline-block; background:#ede9fe;
+              color:#4f46e5; font-size:0.75rem; padding:3px 10px;
+              border-radius:12px; margin:2px;">${t}</span>`
+          ).join("")}
+        </div>
+      </div>`
+  }).join("")
+  
+  console.log("rendering done")
+}
+async function deleteCurrEntry(id) {
+  if (!confirm("Remove this subject?")) return
+  try {
+    const res = await fetch(`${API}/curriculum/${id}`, {
+      method: "DELETE",
+      headers: { "Authorization": "Bearer " + token }
+    })
+    if (res.ok) loadCurriculumList()
+  } catch(e) {}
+}
+</script>
+
+</body>
+</html>

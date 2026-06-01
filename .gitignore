@@ -1,0 +1,90 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+ragas-env/
+
+# Environment Variables
+.env
+.env.*
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+checkpoints.db
+checkpoints.db-shm
+checkpoints.db-wal
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Uploaded Files
+uploads/
+uploaded_files/
+
+# Vector Databases
+chroma_db/
+chromadb/
+vectorstore/
+faiss_index/
+
+# Curriculum & Generated Data
+curriculum.json
+generated_questions.json
+quiz_exports/
+
+# Model Files
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.pth
+*.onnx
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
+
+# Node (if frontend tooling is added later)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Secrets
+secrets.json
+credentials.json
+
+# Cache
+.cache/

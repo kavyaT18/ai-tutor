@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumina — AI Tutor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Ambient background blobs -->
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+  <div class="bg-blob blob-3"></div>
+
+  <div class="page-wrap">
+
+    <!-- Brand mark -->
+    <div class="brand">
+      <div class="brand-icon">✦</div>
+      <span class="brand-name">Lumina</span>
+    </div>
+
+    <div class="card" id="main-card">
+
+      <div class="card-header">
+        <h1>Welcome back</h1>
+        <p class="subtitle">Your learning journey continues here</p>
+      </div>
+
+      <!-- Toggle tabs -->
+      <div class="tabs">
+        <button class="tab active" id="tab-login" onclick="showTab('login', this)">Sign in</button>
+        <button class="tab" id="tab-register" onclick="showTab('register', this)">Create account</button>
+        <div class="tab-indicator" id="tab-indicator"></div>
+      </div>
+
+      <!-- Login form -->
+      <div id="login" class="form-section">
+        <div class="field-group">
+          <label for="login-email">Email address</label>
+          <input type="email" id="login-email" placeholder="you@university.edu" autocomplete="email" />
+        </div>
+        <div class="field-group">
+          <label for="login-password">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="login-password" placeholder="Your password" autocomplete="current-password" />
+            <button class="eye-btn" onclick="togglePassword('login-password', this)" tabindex="-1">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <a href="#" class="forgot-link">Forgot password?</a>
+        <button class="btn" onclick="login()">
+          <span>Sign in</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Register form -->
+      <div id="register" class="form-section hidden">
+        <div class="field-group">
+          <label for="reg-name">Full name</label>
+          <input type="text" id="reg-name" placeholder="Your full name" />
+        </div>
+        <div class="field-group">
+          <label for="reg-email">Email address</label>
+          <input type="email" id="reg-email" placeholder="you@university.edu" />
+        </div>
+        <div class="field-group">
+          <label for="reg-password">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="reg-password" placeholder="Create a password" />
+            <button class="eye-btn" onclick="togglePassword('reg-password', this)" tabindex="-1">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="field-group">
+          <label for="reg-role">I am a</label>
+          <div class="select-wrap">
+            <select id="reg-role">
+              <option value="student">Student</option>
+              <option value="professor">Professor</option>
+            </select>
+            <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </div>
+        </div>
+        <button class="btn" onclick="register()">
+          <span>Create account</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+
+      <p id="message" class="message"></p>
+
+    </div>
+
+    <p class="footer-note">An AI-powered learning platform built for curiosity</p>
+
+  </div>
+
+  <script>
+    const API = "http://127.0.0.1:8000"
+
+    function showTab(tab, btn) {
+      const loginEl = document.getElementById("login")
+      const registerEl = document.getElementById("register")
+      const indicator = document.getElementById("tab-indicator")
+      const header = document.querySelector(".card-header h1")
+      const subtitle = document.querySelector(".card-header .subtitle")
+
+      // Slide forms
+      loginEl.classList.toggle("hidden", tab !== "login")
+      registerEl.classList.toggle("hidden", tab !== "register")
+
+      // Tab active state
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"))
+      btn.classList.add("active")
+
+      // Move indicator
+      indicator.style.left = tab === "login" ? "4px" : "calc(50% + 0px)"
+
+      // Update header copy
+      if (tab === "login") {
+        header.textContent = "Welcome back"
+        subtitle.textContent = "Your learning journey continues here"
+      } else {
+        header.textContent = "Join Lumina"
+        subtitle.textContent = "Start your guided learning experience"
+      }
+
+      clearMessage()
+    }
+
+    async function login() {
+      const email = document.getElementById("login-email").value
+      const password = document.getElementById("login-password").value
+
+      if (!email || !password) { setMessage("Please fill in all fields.", "error"); return }
+
+      const btn = document.querySelector("#login .btn")
+      setLoading(btn, true)
+      setMessage("Signing you in…")
+
+      try {
+        const res = await fetch(`${API}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        })
+        const data = await res.json()
+
+        if (!res.ok) {
+          setMessage(data.detail || "Login failed. Please check your credentials.", "error")
+          setLoading(btn, false)
+          return
+        }
+
+        localStorage.setItem("token", data.token)
+        localStorage.setItem("role", data.role)
+        localStorage.setItem("name", data.name)
+
+        setMessage("Redirecting…", "success")
+        setTimeout(() => {
+          window.location.href = data.role === "professor" ? "professor.html" : "student.html"
+        }, 600)
+
+      } catch (e) {
+        setMessage("Cannot reach the server. Is the backend running?", "error")
+        setLoading(btn, false)
+      }
+    }
+
+    async function register() {
+      const name = document.getElementById("reg-name").value
+      const email = document.getElementById("reg-email").value
+      const password = document.getElementById("reg-password").value
+      const role = document.getElementById("reg-role").value
+
+      if (!name || !email || !password) { setMessage("Please fill in all fields.", "error"); return }
+
+      const btn = document.querySelector("#register .btn")
+      setLoading(btn, true)
+      setMessage("Creating your account…")
+
+      try {
+        const res = await fetch(`${API}/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password, role })
+        })
+        const data = await res.json()
+
+        if (!res.ok) {
+          setMessage(data.detail || "Registration failed.", "error")
+          setLoading(btn, false)
+          return
+        }
+
+        setMessage("Account created! Please sign in.", "success")
+        setTimeout(() => showTab("login", document.getElementById("tab-login")), 1000)
+
+      } catch (e) {
+        setMessage("Cannot reach the server.", "error")
+        setLoading(btn, false)
+      }
+    }
+
+    function setMessage(msg, type = "") {
+      const el = document.getElementById("message")
+      el.textContent = msg
+      el.className = "message " + type
+    }
+
+    function clearMessage() {
+      const el = document.getElementById("message")
+      el.textContent = ""
+      el.className = "message"
+    }
+
+    function setLoading(btn, loading) {
+      if (loading) {
+        btn.classList.add("loading")
+        btn.disabled = true
+      } else {
+        btn.classList.remove("loading")
+        btn.disabled = false
+      }
+    }
+
+    function togglePassword(id, btn) {
+      const input = document.getElementById(id)
+      const isText = input.type === "text"
+      input.type = isText ? "password" : "text"
+      btn.style.opacity = isText ? "0.5" : "1"
+    }
+
+    // Init indicator position
+    document.getElementById("tab-indicator").style.left = "4px"
+  </script>
+
+</body>
+</html>

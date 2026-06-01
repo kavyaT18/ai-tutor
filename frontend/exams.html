@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Exam Marks</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { background: #f0f4f8; }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: white;
+      padding: 6px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .tab-btn.active { background: #4f46e5; color: white; font-weight: 600; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+    }
+
+    .section h3 { color: #1a1a2e; margin-bottom: 18px; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      color: #666;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .form-group input, .form-group select {
+      margin: 0;
+      width: 100%;
+    }
+
+    .status-msg {
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .status-msg.success { display:block; background:#f0fff4; color:#276749; border:1px solid #9ae6b4; }
+    .status-msg.error   { display:block; background:#fff5f5; color:#c53030; border:1px solid #feb2b2; }
+    .status-msg.loading { display:block; background:#ede9fe; color:#4f46e5; }
+
+    /* CSV template box */
+    .csv-template {
+      background: #1a1a2e;
+      color: #a5f3a5;
+      font-family: monospace;
+      font-size: 0.82rem;
+      padding: 16px;
+      border-radius: 8px;
+      margin: 12px 0;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    /* Analytics */
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .stat-box {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-box .num { font-size: 1.8rem; font-weight: 800; color: #4f46e5; }
+    .stat-box .lbl { font-size: 0.75rem; color: #888; margin-top: 4px; }
+
+    /* Exam cards */
+    .exam-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .exam-card .exam-name { font-weight: 700; color: #1a1a2e; font-size: 0.95rem; }
+    .exam-card .exam-meta { font-size: 0.8rem; color: #888; margin-top: 3px; }
+
+    .exam-stats {
+      display: flex;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .exam-stat { text-align: center; }
+    .exam-stat .n { font-weight: 700; font-size: 1.1rem; }
+    .exam-stat .l { font-size: 0.7rem; color: #888; }
+
+    /* Grade pills */
+    .grade-grid {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .grade-pill {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .grade-pill.Aplus { background:#f0fff4; color:#276749; }
+    .grade-pill.A     { background:#f0fff4; color:#276749; }
+    .grade-pill.B     { background:#fffbeb; color:#92400e; }
+    .grade-pill.C     { background:#fff8f1; color:#c05621; }
+    .grade-pill.D     { background:#fff5f5; color:#c53030; }
+    .grade-pill.F     { background:#1a1a2e; color:white; }
+
+    /* Subject avg bars */
+    .bar-row { margin-bottom: 10px; }
+    .bar-label { display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:4px; }
+    .bar-bg { background:#e2e8f0; border-radius:8px; height:10px; overflow:hidden; }
+    .bar-fill { height:100%; border-radius:8px; transition:width 0.6s; }
+
+    canvas { width: 100% !important; max-height: 200px; }
+    .empty-state { text-align:center; color:#aaa; padding:32px; font-size:0.9rem; }
+
+    /* Upload result list */
+    .result-list { margin-top: 10px; }
+    .result-item {
+      font-size: 0.82rem;
+      padding: 4px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .result-item.err { color: #c53030; }
+    .result-item.ok  { color: #276749; }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <nav style="margin-bottom:16px;">
+    <h2>📋 Exam Marks</h2>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <a href="professor.html" style="color:#4f46e5; text-decoration:none; font-size:0.9rem;">← Dashboard</a>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('upload')">➕ Upload Marks</button>
+    <button class="tab-btn" onclick="switchTab('csv')">📂 Upload CSV</button>
+    <button class="tab-btn" onclick="switchTab('analytics')">📊 Analytics</button>
+  </div>
+
+  <!-- TAB: Upload single -->
+  <div id="tab-upload" class="tab-content active">
+    <div class="section">
+      <h3>Upload marks for a student</h3>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Student Email *</label>
+          <input type="email" id="s-email" placeholder="student@email.com" />
+        </div>
+        <div class="form-group">
+          <label>Exam Name *</label>
+          <input type="text" id="s-exam" placeholder="Mid Sem 1, Final Exam..." />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Subject *</label>
+          <input type="text" id="s-subject" placeholder="Data Structures" />
+        </div>
+        <div class="form-group">
+          <label>Exam Date *</label>
+          <input type="date" id="s-date" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Marks Obtained *</label>
+          <input type="number" id="s-marks" placeholder="75" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Total Marks *</label>
+          <input type="number" id="s-total" placeholder="100" min="1" />
+        </div>
+      </div>
+
+      <!-- Live grade preview -->
+      <div id="grade-preview" style="display:none; background:#f8fafc; border-radius:8px; padding:12px; margin-bottom:14px; font-size:0.9rem;">
+        Percentage: <strong id="prev-pct">--</strong> &nbsp;·&nbsp; Grade: <strong id="prev-grade">--</strong>
+      </div>
+
+      <button class="btn" onclick="uploadSingle()">Upload Mark</button>
+      <div class="status-msg" id="single-msg"></div>
+    </div>
+  </div>
+
+  <!-- TAB: CSV Upload -->
+  <div id="tab-csv" class="tab-content">
+    <div class="section">
+      <h3>Upload marks for entire class via CSV</h3>
+      <p style="color:#666; font-size:0.88rem; margin-bottom:12px;">
+        Upload one CSV file with all student marks. The file must have exactly these columns:
+      </p>
+
+      <div class="csv-template">email,exam_name,subject,marks_obtained,total_marks,conducted_on
+alice@email.com,Mid Sem 1,Data Structures,72,100,2024-03-15
+bob@email.com,Mid Sem 1,Data Structures,45,100,2024-03-15
+carol@email.com,Mid Sem 1,Data Structures,88,100,2024-03-15</div>
+
+      <button
+        class="btn"
+        style="background:#e2e8f0; color:#333; margin-bottom:14px; width:auto; padding:10px 20px;"
+        onclick="downloadTemplate()"
+      >⬇ Download template CSV</button>
+
+      <input type="file" id="csv-input" accept=".csv" onchange="handleCSV(event)"
+        style="display:block; margin-bottom:14px; font-size:0.9rem;" />
+
+      <div id="csv-preview" style="display:none; margin-bottom:14px;">
+        <p style="font-size:0.85rem; color:#666; margin-bottom:6px;">
+          Preview: <strong id="csv-row-count">0</strong> students found
+        </p>
+        <div id="csv-preview-list" style="max-height:180px; overflow-y:auto; font-size:0.82rem;"></div>
+      </div>
+
+      <button class="btn" id="csv-upload-btn" onclick="uploadCSV()" style="display:none;">
+        Upload All Marks
+      </button>
+      <div class="status-msg" id="csv-msg"></div>
+      <div class="result-list" id="csv-result"></div>
+    </div>
+  </div>
+
+  <!-- TAB: Analytics -->
+  <div id="tab-analytics" class="tab-content">
+
+    <div class="stat-row" id="analytics-stats">
+      <div class="stat-box">
+        <div class="num" id="total-entries">--</div>
+        <div class="lbl">Total Entries</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="total-exams">--</div>
+        <div class="lbl">Unique Exams</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="total-subjects">--</div>
+        <div class="lbl">Subjects</div>
+      </div>
+    </div>
+
+    <!-- Exam breakdown -->
+    <div class="section">
+      <h3>📝 Exam breakdown</h3>
+      <div id="exam-cards">
+        <div class="empty-state">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Subject averages -->
+    <div class="section">
+      <h3>📚 Average by subject</h3>
+      <div id="subject-bars">
+        <div class="empty-state">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Grade distribution -->
+    <div class="section">
+      <h3>🎓 Grade distribution</h3>
+      <div class="grade-grid" id="grade-dist">
+        <div class="empty-state">Loading...</div>
+      </div>
+      <canvas id="grade-chart" style="margin-top:20px;"></canvas>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+<script>
+  const API = "http://localhost:8000"
+  const token = localStorage.getItem("token")
+  const role = localStorage.getItem("role")
+  if (!token || role !== "professor") window.location.href = "index.html"
+
+  let csvFile = null
+  let gradeChart = null
+
+  // ── Tabs ────────────────────────────────────────
+  function switchTab(tab) {
+    document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"))
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"))
+    document.getElementById("tab-" + tab).classList.add("active")
+    event.target.classList.add("active")
+    if (tab === "analytics") loadAnalytics()
+  }
+
+  // ── Live grade preview ──────────────────────────
+  document.getElementById("s-marks").addEventListener("input", updatePreview)
+  document.getElementById("s-total").addEventListener("input", updatePreview)
+
+  function updatePreview() {
+    const marks = parseFloat(document.getElementById("s-marks").value)
+    const total = parseFloat(document.getElementById("s-total").value)
+    if (!marks || !total || total === 0) {
+      document.getElementById("grade-preview").style.display = "none"
+      return
+    }
+    const pct = ((marks / total) * 100).toFixed(1)
+    const grade = calcGrade(pct)
+    document.getElementById("prev-pct").textContent = pct + "%"
+    document.getElementById("prev-grade").textContent = grade
+    document.getElementById("grade-preview").style.display = "block"
+  }
+
+  function calcGrade(pct) {
+    if (pct >= 90) return "A+"
+    if (pct >= 80) return "A"
+    if (pct >= 70) return "B"
+    if (pct >= 60) return "C"
+    if (pct >= 50) return "D"
+    return "F"
+  }
+
+  // ── Single upload ───────────────────────────────
+  async function uploadSingle() {
+    const email   = document.getElementById("s-email").value.trim()
+    const exam    = document.getElementById("s-exam").value.trim()
+    const subject = document.getElementById("s-subject").value.trim()
+    const date    = document.getElementById("s-date").value
+    const marks   = parseFloat(document.getElementById("s-marks").value)
+    const total   = parseFloat(document.getElementById("s-total").value)
+
+    if (!email || !exam || !subject || !date || isNaN(marks) || isNaN(total)) {
+      showMsg("single-msg", "❌ Please fill in all fields.", "error")
+      return
+    }
+
+    if (marks > total) {
+      showMsg("single-msg", "❌ Marks obtained cannot exceed total marks.", "error")
+      return
+    }
+
+    showMsg("single-msg", "Uploading...", "loading")
+
+    try {
+      const res = await fetch(`${API}/professor/upload-mark`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({
+          student_email: email,
+          exam_name: exam,
+          subject: subject,
+          marks_obtained: marks,
+          total_marks: total,
+          conducted_on: date
+        })
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        showMsg("single-msg", "❌ " + (data.detail || "Upload failed"), "error")
+      } else {
+        showMsg("single-msg",
+          `✅ Uploaded for ${email} — ${data.percentage}% (${data.grade})`, "success")
+        // Clear form
+        ;["s-email","s-exam","s-subject","s-date","s-marks","s-total"]
+          .forEach(id => document.getElementById(id).value = "")
+        document.getElementById("grade-preview").style.display = "none"
+      }
+    } catch(e) {
+      showMsg("single-msg", "❌ Cannot reach server.", "error")
+    }
+  }
+
+  // ── CSV handling ────────────────────────────────
+  function handleCSV(e) {
+    csvFile = e.target.files[0]
+    if (!csvFile) return
+
+    const reader = new FileReader()
+    reader.onload = (evt) => {
+      const lines = evt.target.result.split("\n").filter(l => l.trim())
+      const dataRows = lines.slice(1)  // skip header
+      document.getElementById("csv-row-count").textContent = dataRows.length
+
+      document.getElementById("csv-preview-list").innerHTML =
+        dataRows.slice(0, 5).map(r => `<div style="padding:3px 0; border-bottom:1px solid #f1f5f9;">${r}</div>`).join("") +
+        (dataRows.length > 5 ? `<div style="color:#aaa; padding:4px 0;">...and ${dataRows.length - 5} more</div>` : "")
+
+      document.getElementById("csv-preview").style.display = "block"
+      document.getElementById("csv-upload-btn").style.display = "block"
+    }
+    reader.readAsText(csvFile)
+  }
+
+  async function uploadCSV() {
+    if (!csvFile) return
+    showMsg("csv-msg", "Uploading and processing...", "loading")
+    document.getElementById("csv-result").innerHTML = ""
+
+    const formData = new FormData()
+    formData.append("file", csvFile)
+
+    try {
+      const res = await fetch(`${API}/professor/upload-marks-csv`, {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + token },
+        body: formData
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        showMsg("csv-msg", "❌ " + (data.detail || "Upload failed"), "error")
+        return
+      }
+
+      showMsg("csv-msg",
+        `✅ ${data.uploaded} marks uploaded successfully` +
+        (data.errors.length > 0 ? ` · ${data.errors.length} errors` : ""),
+        data.errors.length > 0 ? "error" : "success"
+      )
+
+      // Show errors
+      if (data.errors.length > 0) {
+        document.getElementById("csv-result").innerHTML =
+          `<p style="font-size:0.82rem; color:#c53030; margin:8px 0 4px;">Errors:</p>` +
+          data.errors.map(e => `<div class="result-item err">⚠ ${e}</div>`).join("")
+      }
+
+    } catch(e) {
+      showMsg("csv-msg", "❌ Cannot reach server.", "error")
+    }
+  }
+
+  function downloadTemplate() {
+    const csv = `email,exam_name,subject,marks_obtained,total_marks,conducted_on
+student1@email.com,Mid Sem 1,Data Structures,72,100,2024-03-15
+student2@email.com,Mid Sem 1,Data Structures,45,100,2024-03-15`
+    const blob = new Blob([csv], { type: "text/csv" })
+    const a = document.createElement("a")
+    a.href = URL.createObjectURL(blob)
+    a.download = "exam_marks_template.csv"
+    a.click()
+  }
+
+  // ── Analytics ───────────────────────────────────
+  async function loadAnalytics() {
+    try {
+      const res = await fetch(`${API}/professor/exam-analytics`, {
+        headers: { "Authorization": "Bearer " + token }
+      })
+      const d = await res.json()
+
+      document.getElementById("total-entries").textContent = d.total_entries
+      document.getElementById("total-exams").textContent = (d.exams || []).length
+      document.getElementById("total-subjects").textContent =
+        Object.keys(d.subject_avg || {}).length
+
+      // Exam cards
+      renderExamCards(d.exams || [])
+
+      // Subject bars
+      renderSubjectBars(d.subject_avg || {})
+
+      // Grade distribution
+      renderGradeDist(d.grade_dist || {})
+
+    } catch(e) {
+      console.error("Analytics load failed:", e)
+    }
+  }
+
+  function renderExamCards(exams) {
+    const container = document.getElementById("exam-cards")
+    if (!exams.length) {
+      container.innerHTML = `<div class="empty-state">No exam data uploaded yet.</div>`
+      return
+    }
+    container.innerHTML = exams.map(e => {
+      const color = e.avg >= 70 ? "#38a169" : e.avg >= 50 ? "#d69e2e" : "#e53e3e"
+      return `
+        <div class="exam-card">
+          <div>
+            <div class="exam-name">${e.name}</div>
+            <div class="exam-meta">${e.count} student${e.count > 1 ? "s" : ""}</div>
+          </div>
+          <div class="exam-stats">
+            <div class="exam-stat">
+              <div class="n" style="color:${color}">${e.avg}%</div>
+              <div class="l">Class avg</div>
+            </div>
+            <div class="exam-stat">
+              <div class="n" style="color:#38a169">${e.highest}%</div>
+              <div class="l">Highest</div>
+            </div>
+            <div class="exam-stat">
+              <div class="n" style="color:#e53e3e">${e.lowest}%</div>
+              <div class="l">Lowest</div>
+            </div>
+          </div>
+        </div>`
+    }).join("")
+  }
+
+  function renderSubjectBars(subjectAvg) {
+    const container = document.getElementById("subject-bars")
+    const entries = Object.entries(subjectAvg)
+    if (!entries.length) {
+      container.innerHTML = `<div class="empty-state">No data yet.</div>`
+      return
+    }
+    entries.sort((a, b) => b[1] - a[1])
+    container.innerHTML = entries.map(([subj, avg]) => {
+      const color = avg >= 70 ? "#38a169" : avg >= 50 ? "#d69e2e" : "#e53e3e"
+      return `
+        <div class="bar-row">
+          <div class="bar-label">
+            <span>${subj}</span>
+            <span style="font-weight:700; color:${color}">${avg}%</span>
+          </div>
+          <div class="bar-bg">
+            <div class="bar-fill" style="width:${avg}%; background:${color};"></div>
+          </div>
+        </div>`
+    }).join("")
+  }
+
+  function renderGradeDist(gradeDist) {
+    const gradeOrder = ["A+","A","B","C","D","F"]
+    const gradeClass = {"A+":"Aplus","A":"A","B":"B","C":"C","D":"D","F":"F"}
+    const container = document.getElementById("grade-dist")
+
+    if (!Object.keys(gradeDist).length) {
+      container.innerHTML = `<div class="empty-state">No data yet.</div>`
+      return
+    }
+
+    container.innerHTML = gradeOrder
+      .filter(g => gradeDist[g])
+      .map(g => `
+        <div class="grade-pill ${gradeClass[g]}">
+          ${g}<br>
+          <span style="font-size:1.2rem;">${gradeDist[g]}</span>
+          <br><span style="font-size:0.7rem; opacity:0.7;">students</span>
+        </div>`).join("")
+
+    // Doughnut chart
+    if (gradeChart) { gradeChart.destroy(); gradeChart = null; }
+    const labels = gradeOrder.filter(g => gradeDist[g])
+    const data   = labels.map(g => gradeDist[g])
+    const colors = ["#38a169","#48bb78","#d69e2e","#ed8936","#e53e3e","#1a1a2e"]
+
+    const ctx = document.getElementById("grade-chart").getContext("2d")
+    gradeChart = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: colors.slice(0, labels.length),
+          borderWidth: 2,
+          borderColor: "#fff"
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: "bottom", labels: { font: { size: 12 } } }
+        }
+      }
+    })
+  }
+
+  function showMsg(id, msg, type) {
+    const el = document.getElementById(id)
+    el.textContent = msg
+    el.className = "status-msg " + type
+  }
+
+  function logout() {
+    localStorage.clear()
+    window.location.href = "index.html"
+  }
+</script>
+</body>
+</html>

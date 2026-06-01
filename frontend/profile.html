@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Profile</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --bg:#1a1814;
+      --bg-card:#211f1b;
+      --bg-elevated:#2a2723;
+      --bg-input:#252320;
+      --border:rgba(255,255,255,0.08);
+      --border-hover:rgba(212,168,75,0.3);
+      --text-primary:#f0ebe0;
+      --text-secondary:#9e9890;
+      --text-muted:#5c5850;
+      --accent:#d4a84b;
+      --accent-glow:rgba(212,168,75,0.16);
+      --accent-hover:#e8c06a;
+      --success:#6ec98a;
+      --warning:#e8a94b;
+      --error:#e07070;
+      --radius:12px;
+      --transition:0.2s cubic-bezier(0.4,0,0.2,1);
+      --shadow-card:0 10px 34px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.04) inset;
+    }
+
+    body {
+      font-family:'DM Sans',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      background:var(--bg) !important;
+      color:var(--text-primary);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    body::before, body::after {
+      content:'';
+      position:fixed;
+      border-radius:50%;
+      filter:blur(100px);
+      pointer-events:none;
+      z-index:-1;
+      opacity:0.16;
+    }
+
+    body::before {
+      width:500px;
+      height:500px;
+      background:radial-gradient(circle,#c47d1a,transparent 70%);
+      top:-150px;
+      left:-100px;
+    }
+
+    body::after {
+      width:420px;
+      height:420px;
+      background:radial-gradient(circle,#2a5c8a,transparent 70%);
+      bottom:-120px;
+      right:-90px;
+    }
+
+    .profile-wrap {
+      max-width:720px;
+      margin:0 auto;
+      padding:28px 18px 44px;
+      position:relative;
+      z-index:1;
+      animation:fadeUp 0.35s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(12px); }
+      to { opacity:1; transform:translateY(0); }
+    }
+
+    nav {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      margin-bottom:18px !important;
+      padding:18px 20px;
+      background:rgba(33,31,27,0.76);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      backdrop-filter:blur(16px);
+      box-shadow:var(--shadow-card);
+    }
+
+    nav h2 {
+      font-family:'Lora',Georgia,serif;
+      color:var(--text-primary);
+      font-size:1.45rem;
+      font-weight:600;
+      letter-spacing:0;
+    }
+
+    nav a {
+      color:var(--accent) !important;
+      text-decoration:none;
+      font-size:0.9rem;
+      background:var(--bg-elevated);
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:8px 13px;
+      transition:background var(--transition),border-color var(--transition),color var(--transition);
+    }
+
+    nav a:hover {
+      color:var(--accent-hover) !important;
+      border-color:var(--border-hover);
+      background:var(--accent-glow);
+    }
+
+    .logout {
+      padding:8px 15px;
+      border:1px solid rgba(224,112,112,0.24);
+      background:rgba(224,112,112,0.1);
+      color:var(--error);
+      border-radius:8px;
+      cursor:pointer;
+      font-size:0.86rem;
+      font-weight:500;
+      font-family:'DM Sans',system-ui,sans-serif;
+      transition:background var(--transition),border-color var(--transition);
+    }
+
+    .logout:hover { background:rgba(224,112,112,0.18); border-color:rgba(224,112,112,0.4); }
+
+    .section {
+      background:var(--bg-card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:28px;
+      box-shadow:var(--shadow-card);
+      margin-bottom:20px;
+    }
+
+    .section h3 {
+      font-family:'Lora',Georgia,serif;
+      color:var(--text-primary);
+      margin-bottom:18px;
+      font-size:1.05rem;
+      font-weight:600;
+    }
+
+    p { color:var(--text-secondary) !important; }
+
+    .avatar {
+      width:74px;
+      height:74px;
+      border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),#a06e20);
+      color:#1a1510;
+      font-size:1.8rem;
+      font-weight:700;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin-bottom:14px;
+      border:2px solid rgba(212,168,75,0.32);
+      box-shadow:0 0 0 6px rgba(212,168,75,0.08);
+    }
+
+    .profile-name {
+      font-family:'Lora',Georgia,serif;
+      font-size:1.45rem;
+      font-weight:600;
+      color:var(--text-primary);
+    }
+
+    .profile-email {
+      color:var(--text-secondary);
+      font-size:0.9rem;
+      margin-top:5px;
+    }
+
+    .level-grid {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-bottom:20px;
+    }
+
+    .style-grid {
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:12px;
+      margin-bottom:20px;
+    }
+
+    .level-card, .style-card {
+      border:1px solid var(--border);
+      background:var(--bg-elevated);
+      border-radius:10px;
+      cursor:pointer;
+      transition:border-color var(--transition),background var(--transition),transform var(--transition);
+    }
+
+    .level-card {
+      padding:16px 12px;
+      text-align:center;
+    }
+
+    .style-card {
+      padding:14px;
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+    }
+
+    .level-card:hover, .style-card:hover {
+      border-color:var(--border-hover);
+      background:#302c26;
+      transform:translateY(-2px);
+    }
+
+    .level-card.selected, .style-card.selected {
+      border-color:rgba(212,168,75,0.55);
+      background:var(--accent-glow);
+      box-shadow:0 0 0 3px rgba(212,168,75,0.08);
+    }
+
+    .level-card .lc-icon { font-size:1.8rem; margin-bottom:8px; }
+    .level-card .lc-title, .style-card .sc-title {
+      font-weight:600;
+      font-size:0.9rem;
+      color:var(--text-primary);
+    }
+
+    .level-card .lc-desc, .style-card .sc-desc {
+      font-size:0.75rem;
+      color:var(--text-secondary);
+      margin-top:4px;
+      line-height:1.4;
+    }
+
+    .style-card .sc-icon {
+      font-size:1.35rem;
+      flex-shrink:0;
+      line-height:1;
+    }
+
+    .mini-stats {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+    }
+
+    .mini-stat {
+      text-align:center;
+      padding:15px 12px;
+      background:var(--bg-elevated);
+      border:1px solid var(--border);
+      border-radius:10px;
+    }
+
+    .mini-stat .num {
+      font-family:'Lora',Georgia,serif;
+      font-size:1.55rem;
+      font-weight:600;
+      color:var(--accent);
+    }
+
+    .mini-stat .lbl {
+      font-size:0.75rem;
+      color:var(--text-secondary);
+      margin-top:4px;
+    }
+
+    .tag {
+      display:inline-block;
+      padding:4px 12px;
+      border-radius:20px;
+      font-size:0.8rem;
+      margin:3px;
+      border:1px solid transparent;
+      font-weight:600;
+    }
+
+    .tag.weak {
+      background:rgba(224,112,112,0.12);
+      color:var(--error);
+      border-color:rgba(224,112,112,0.24);
+    }
+
+    .tag.good {
+      background:rgba(110,201,138,0.12);
+      color:var(--success);
+      border-color:rgba(110,201,138,0.24);
+    }
+
+    .btn {
+      width:100%;
+      background:var(--accent);
+      color:#1a1510;
+      border:none;
+      border-radius:9px;
+      padding:11px 18px;
+      cursor:pointer;
+      font-family:'DM Sans',system-ui,sans-serif;
+      font-weight:700;
+      font-size:0.92rem;
+      transition:background var(--transition),transform var(--transition);
+    }
+
+    .btn:hover { background:var(--accent-hover); transform:translateY(-1px); }
+
+    .save-msg {
+      display:none;
+      text-align:center;
+      padding:10px;
+      border-radius:8px;
+      font-size:0.9rem;
+      margin-top:12px;
+      border:1px solid transparent;
+    }
+
+    .save-msg.success {
+      display:block;
+      background:rgba(110,201,138,0.12);
+      color:var(--success);
+      border-color:rgba(110,201,138,0.24);
+    }
+
+    .save-msg.error {
+      display:block;
+      background:rgba(224,112,112,0.12);
+      color:var(--error);
+      border-color:rgba(224,112,112,0.24);
+    }
+
+    @media(max-width:680px) {
+      .profile-wrap { padding:18px 12px 32px; }
+      nav { flex-direction:column; align-items:flex-start; }
+      nav > div { flex-wrap:wrap; }
+      .section { padding:22px 18px; }
+      .level-grid, .style-grid, .mini-stats { grid-template-columns:1fr; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="profile-wrap">
+
+  <nav style="margin-bottom:16px;">
+    <h2>👤 My Profile</h2>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <a href="student.html" style="color:#4f46e5; text-decoration:none; font-size:0.9rem;">← Dashboard</a>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- Identity card -->
+  <div class="section">
+    <div class="avatar" id="avatar">?</div>
+    <div class="profile-name" id="profile-name">Loading...</div>
+    <div class="profile-email" id="profile-email"></div>
+
+    <div class="mini-stats" style="margin-top:20px;">
+      <div class="mini-stat">
+        <div class="num" id="avg-score">--</div>
+        <div class="lbl">Avg Score</div>
+      </div>
+      <div class="mini-stat">
+        <div class="num" id="attempts">--</div>
+        <div class="lbl">Quizzes Taken</div>
+      </div>
+      <div class="mini-stat">
+        <div class="num" id="risk">--</div>
+        <div class="lbl">Risk Score</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level selector -->
+  <div class="section">
+    <h3>🎯 Your knowledge level</h3>
+    <p style="font-size:0.85rem; color:#666; margin-bottom:16px;">
+      This tells the AI how to explain things to you.
+    </p>
+
+    <div class="level-grid">
+      <div class="level-card" id="level-beginner" onclick="selectLevel('beginner')">
+        <div class="lc-icon">🌱</div>
+        <div class="lc-title">Beginner</div>
+        <div class="lc-desc">Simple words, analogies, no jargon</div>
+      </div>
+      <div class="level-card" id="level-intermediate" onclick="selectLevel('intermediate')">
+        <div class="lc-icon">⚡</div>
+        <div class="lc-title">Intermediate</div>
+        <div class="lc-desc">Some concepts, code examples</div>
+      </div>
+      <div class="level-card" id="level-advanced" onclick="selectLevel('advanced')">
+        <div class="lc-icon">🚀</div>
+        <div class="lc-title">Advanced</div>
+        <div class="lc-desc">Deep dives, edge cases, theory</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Learning style selector -->
+  <div class="section">
+    <h3>🧠 Your learning style</h3>
+    <p style="font-size:0.85rem; color:#666; margin-bottom:16px;">
+      Helps the AI adapt how it explains things.
+    </p>
+
+    <div class="style-grid">
+      <div class="style-card" id="style-visual" onclick="selectStyle('visual')">
+        <span class="sc-icon">🖼️</span>
+        <div>
+          <div class="sc-title">Visual</div>
+          <div class="sc-desc">Diagrams, charts, structured layouts</div>
+        </div>
+      </div>
+      <div class="style-card" id="style-example" onclick="selectStyle('example')">
+        <span class="sc-icon">💡</span>
+        <div>
+          <div class="sc-title">Example-first</div>
+          <div class="sc-desc">Show me examples before theory</div>
+        </div>
+      </div>
+      <div class="style-card" id="style-theory" onclick="selectStyle('theory')">
+        <span class="sc-icon">📖</span>
+        <div>
+          <div class="sc-title">Theory-first</div>
+          <div class="sc-desc">Explain concepts before examples</div>
+        </div>
+      </div>
+      <div class="style-card" id="style-mixed" onclick="selectStyle('mixed')">
+        <span class="sc-icon">🔀</span>
+        <div>
+          <div class="sc-title">Mixed</div>
+          <div class="sc-desc">Balance of everything</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn" onclick="saveProfile()">Save preferences</button>
+    <div class="save-msg" id="save-msg"></div>
+  </div>
+
+  <!-- Topics overview -->
+  <div class="section">
+    <h3>📚 Your topics overview</h3>
+
+    <p style="font-size:0.85rem; color:#888; margin-bottom:8px;">⚠️ Weak topics</p>
+    <div id="weak-tags">
+      <span style="color:#aaa; font-size:0.85rem;">None yet</span>
+    </div>
+
+   
+
+</div>
+
+<script>
+  const API = "http://localhost:8000"
+  const token = localStorage.getItem("token")
+  if (!token) window.location.href = "index.html"
+
+  let selectedLevel = "beginner"
+  let selectedStyle = "mixed"
+
+  async function loadProfile() {
+    try {
+      const res = await fetch(`${API}/student/profile/full`, {
+        headers: { "Authorization": "Bearer " + token }
+      })
+      if (res.status === 401) { logout(); return; }
+      const d = await res.json()
+
+      // Identity
+      const initials = d.name.split(" ").map(w => w[0]).join("").toUpperCase()
+      document.getElementById("avatar").textContent = initials
+      document.getElementById("profile-name").textContent = d.name
+      document.getElementById("profile-email").textContent = d.email
+
+      // Stats
+      document.getElementById("avg-score").textContent = (d.avg_score || 0).toFixed(0) + "%"
+      document.getElementById("attempts").textContent = d.attempt_count || 0
+      document.getElementById("risk").textContent = (d.risk_score || 0).toFixed(0)
+
+      // Set level and style
+      selectLevel(d.level || "beginner", false)
+      selectStyle(d.learning_style || "mixed", false)
+
+      // Topics
+      renderWeakTags(d.weak_topics || [])
+    } catch(e) {
+      console.error("Failed to load profile:", e)
+    }
+  }
+
+  function selectLevel(level, save = true) {
+    selectedLevel = level
+    ;["beginner", "intermediate", "advanced"].forEach(l => {
+      document.getElementById("level-" + l).classList.toggle("selected", l === level)
+    })
+  }
+
+  function selectStyle(style, save = true) {
+    selectedStyle = style
+    ;["visual", "example", "theory", "mixed"].forEach(s => {
+      document.getElementById("style-" + s).classList.toggle("selected", s === style)
+    })
+  }
+
+  async function saveProfile() {
+    try {
+      const res = await fetch(`${API}/student/profile/update`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({
+          level: selectedLevel,
+          learning_style: selectedStyle
+        })
+      })
+
+      const data = await res.json()
+      const msg = document.getElementById("save-msg")
+
+      if (!res.ok) {
+        msg.textContent = "❌ " + (data.detail || "Save failed")
+        msg.className = "save-msg error"
+      } else {
+        msg.textContent = "✅ Preferences saved! AI will now adapt to your level."
+        msg.className = "save-msg success"
+        setTimeout(() => { msg.className = "save-msg" }, 3000)
+      }
+
+    } catch(e) {
+      const msg = document.getElementById("save-msg")
+      msg.textContent = "❌ Cannot reach server."
+      msg.className = "save-msg error"
+    }
+  }
+
+  function renderWeakTags(topics) {
+  const el = document.getElementById("weak-tags")
+  if (!topics || topics.length === 0) {
+    el.innerHTML = `<span style="color:#aaa;font-size:0.85rem;">None yet</span>`
+    return
+  }
+  const grouped = {}
+  topics.forEach(w => {
+    const subj = typeof w === "object" ? w.subject : "General"
+    const topic = typeof w === "object" ? w.topic : w
+    grouped[subj] = grouped[subj] || []
+    grouped[subj].push(topic)
+  })
+  el.innerHTML = Object.entries(grouped).map(([subj, ts]) => `
+    <div style="margin-bottom:10px;">
+      <div style="font-size:0.75rem; color:#888; margin-bottom:4px;">${subj}</div>
+      ${ts.map(t => `<span class="tag weak">${t}</span>`).join("")}
+    </div>`).join("")
+}
+
+  function logout() {
+    localStorage.clear()
+    window.location.href = "index.html"
+  }
+
+  loadProfile()
+</script>
+
+</body>
+</html>

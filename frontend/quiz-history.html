@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz History</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --bg:#1a1814;
+      --bg-card:#211f1b;
+      --bg-elevated:#2a2723;
+      --border:rgba(255,255,255,0.08);
+      --border-hover:rgba(212,168,75,0.3);
+      --text-primary:#f0ebe0;
+      --text-secondary:#9e9890;
+      --text-muted:#5c5850;
+      --accent:#d4a84b;
+      --accent-glow:rgba(212,168,75,0.16);
+      --accent-hover:#e8c06a;
+      --success:#6ec98a;
+      --warning:#e8a94b;
+      --error:#e07070;
+      --radius:12px;
+      --transition:0.2s cubic-bezier(0.4,0,0.2,1);
+      --shadow-card:0 10px 34px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.04) inset;
+    }
+
+    body {
+      font-family:'DM Sans',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      background:var(--bg) !important;
+      color:var(--text-primary);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    body::before, body::after {
+      content:'';
+      position:fixed;
+      border-radius:50%;
+      filter:blur(100px);
+      pointer-events:none;
+      z-index:-1;
+      opacity:0.16;
+    }
+
+    body::before {
+      width:500px;
+      height:500px;
+      background:radial-gradient(circle,#c47d1a,transparent 70%);
+      top:-150px;
+      left:-100px;
+    }
+
+    body::after {
+      width:420px;
+      height:420px;
+      background:radial-gradient(circle,#2a5c8a,transparent 70%);
+      bottom:-120px;
+      right:-90px;
+    }
+
+    .wrap {
+      max-width:840px;
+      margin:0 auto;
+      padding:28px 18px 44px;
+      position:relative;
+      z-index:1;
+      animation:fadeUp 0.35s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(12px); }
+      to { opacity:1; transform:translateY(0); }
+    }
+
+    nav {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      margin-bottom:18px !important;
+      padding:18px 20px;
+      background:rgba(33,31,27,0.76);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      backdrop-filter:blur(16px);
+      box-shadow:var(--shadow-card);
+    }
+
+    nav h2 {
+      font-family:'Lora',Georgia,serif;
+      color:var(--text-primary);
+      font-size:1.45rem;
+      font-weight:600;
+      letter-spacing:0;
+    }
+
+    nav a {
+      color:var(--accent) !important;
+      text-decoration:none;
+      font-size:0.9rem;
+      background:var(--bg-elevated);
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:8px 13px;
+      transition:background var(--transition),border-color var(--transition),color var(--transition);
+    }
+
+    nav a:hover {
+      color:var(--accent-hover) !important;
+      border-color:var(--border-hover);
+      background:var(--accent-glow);
+    }
+
+    .logout {
+      padding:8px 15px;
+      border:1px solid rgba(224,112,112,0.24);
+      background:rgba(224,112,112,0.1);
+      color:var(--error);
+      border-radius:8px;
+      cursor:pointer;
+      font-size:0.86rem;
+      font-weight:500;
+      font-family:'DM Sans',system-ui,sans-serif;
+      transition:background var(--transition),border-color var(--transition);
+    }
+
+    .logout:hover { background:rgba(224,112,112,0.18); border-color:rgba(224,112,112,0.4); }
+
+    .attempt-card {
+      background:var(--bg-card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:20px;
+      box-shadow:var(--shadow-card);
+      margin-bottom:14px;
+      cursor:pointer;
+      transition:transform var(--transition),border-color var(--transition),box-shadow var(--transition);
+    }
+
+    .attempt-card:hover {
+      transform:translateY(-3px);
+      border-color:var(--border-hover);
+      box-shadow:0 14px 34px rgba(0,0,0,0.42);
+    }
+
+    .attempt-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+    }
+
+    .attempt-topic {
+      font-family:'Lora',Georgia,serif;
+      font-weight:600;
+      color:var(--text-primary);
+      font-size:1.02rem;
+    }
+
+    .attempt-meta {
+      font-size:0.8rem;
+      color:var(--text-secondary);
+      margin-top:5px;
+      line-height:1.5;
+    }
+
+    .score-circle {
+      width:52px;
+      height:52px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+      font-size:0.9rem;
+      flex-shrink:0;
+      border:2px solid transparent;
+    }
+
+    .score-circle.high { background:rgba(110,201,138,0.12); color:var(--success); border-color:rgba(110,201,138,0.34); }
+    .score-circle.mid  { background:rgba(232,169,75,0.12); color:var(--warning); border-color:rgba(232,169,75,0.34); }
+    .score-circle.low  { background:rgba(224,112,112,0.12); color:var(--error); border-color:rgba(224,112,112,0.34); }
+
+    .modal-overlay {
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.62);
+      z-index:100;
+      align-items:flex-start;
+      justify-content:center;
+      padding:20px;
+      overflow-y:auto;
+    }
+
+    .modal-overlay.open { display:flex; }
+
+    .modal {
+      background:var(--bg-card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:28px;
+      width:100%;
+      max-width:680px;
+      box-shadow:var(--shadow-card);
+      margin:auto;
+    }
+
+    .modal-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:20px;
+    }
+
+    #modal-topic {
+      font-family:'Lora',Georgia,serif;
+      color:var(--text-primary) !important;
+      font-weight:600;
+    }
+
+    #modal-meta { color:var(--text-secondary) !important; }
+
+    .modal-header button {
+      background:var(--bg-elevated) !important;
+      border:1px solid var(--border) !important;
+      border-radius:8px !important;
+      padding:7px 12px !important;
+      cursor:pointer;
+      font-size:1rem;
+      color:var(--text-secondary) !important;
+    }
+
+    .modal-header button:hover {
+      color:var(--text-primary) !important;
+      border-color:var(--border-hover) !important;
+    }
+
+    .q-row {
+      border:1px solid var(--border);
+      background:var(--bg-elevated);
+      border-radius:10px;
+      padding:14px;
+      margin-bottom:12px;
+    }
+
+    .q-row .q-text {
+      font-size:0.88rem;
+      font-weight:600;
+      color:var(--text-primary);
+      margin-bottom:9px;
+      line-height:1.5;
+    }
+
+    .q-row .ans-row {
+      font-size:0.82rem;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .correct-ans { color:var(--success); }
+    .wrong-ans { color:var(--error); }
+
+    .feedback-section {
+      background:#181612;
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:16px;
+      font-size:0.85rem;
+      line-height:1.7;
+      white-space:pre-wrap;
+      color:var(--text-secondary);
+      margin-top:16px;
+      max-height:300px;
+      overflow-y:auto;
+    }
+
+    .empty-state {
+      text-align:center;
+      padding:60px 24px;
+      color:var(--text-secondary);
+      background:var(--bg-card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow-card);
+    }
+
+    .empty-state a { color:var(--accent) !important; }
+
+    .pill {
+      display:inline-block;
+      padding:2px 10px;
+      border-radius:20px;
+      font-size:0.75rem;
+      font-weight:600;
+      border:1px solid transparent;
+    }
+
+    .pill.easy { background:rgba(110,201,138,0.12); color:var(--success); border-color:rgba(110,201,138,0.24); }
+    .pill.medium { background:rgba(232,169,75,0.12); color:var(--warning); border-color:rgba(232,169,75,0.24); }
+    .pill.hard { background:rgba(224,112,112,0.12); color:var(--error); border-color:rgba(224,112,112,0.24); }
+
+    @media(max-width:680px) {
+      .wrap { padding:18px 12px 32px; }
+      nav { flex-direction:column; align-items:flex-start; }
+      nav > div { flex-wrap:wrap; }
+      .attempt-header { align-items:center; }
+      .modal { padding:22px 18px; }
+      .modal-header { align-items:flex-start; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <nav style="margin-bottom:16px;">
+    <h2>📋 Quiz History</h2>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <a href="student.html" style="color:#4f46e5; text-decoration:none; font-size:0.9rem;">← Dashboard</a>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <div id="history-list">
+    <div class="empty-state">Loading...</div>
+  </div>
+
+</div>
+
+<!-- Detail modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div>
+        <h3 id="modal-topic" style="margin:0; color:#1a1a2e;"></h3>
+        <p id="modal-meta" style="margin:4px 0 0; font-size:0.8rem; color:#888;"></p>
+      </div>
+      <button
+        onclick="closeModalDirect()"
+        style="background:#f1f5f9; border:none; border-radius:8px;
+               padding:6px 12px; cursor:pointer; font-size:1rem; color:#666;">
+        ✕
+      </button>
+    </div>
+
+    <div id="modal-questions"></div>
+    <div class="feedback-section" id="modal-feedback"></div>
+  </div>
+</div>
+
+<script>
+  const API   = "http://localhost:8000"
+  const token = localStorage.getItem("token")
+  if (!token) window.location.href = "index.html"
+
+  async function loadHistory() {
+    try {
+      const res = await fetch(`${API}/quiz/history`, {
+        headers: { "Authorization": "Bearer " + token }
+      })
+      const attempts = await res.json()
+      const container = document.getElementById("history-list")
+
+      if (!attempts || attempts.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            No quizzes taken yet.<br>
+            <a href="quiz.html" style="color:#4f46e5;">Take your first quiz →</a>
+          </div>`
+        return
+      }
+
+      container.innerHTML = attempts.map(a => {
+        const cls = a.percentage >= 80 ? "high" : a.percentage >= 60 ? "mid" : "low"
+        return `
+          <div class="attempt-card" onclick="openDetail(${a.id})">
+            <div class="attempt-header">
+              <div>
+                <div class="attempt-topic">${a.topic}</div>
+                <div class="attempt-meta">
+                  ${a.timestamp} &nbsp;·&nbsp;
+                  <span class="pill ${a.difficulty}">${a.difficulty}</span>
+                  &nbsp;·&nbsp; ${a.score}/${a.total} correct
+                </div>
+              </div>
+              <div class="score-circle ${cls}">${a.percentage}%</div>
+            </div>
+          </div>`
+      }).join("")
+
+    } catch(e) {
+      document.getElementById("history-list").innerHTML =
+        `<div class="empty-state">Could not load history.</div>`
+    }
+  }
+
+  async function openDetail(attemptId) {
+    try {
+      const res = await fetch(`${API}/quiz/history/${attemptId}`, {
+        headers: { "Authorization": "Bearer " + token }
+      })
+      const data = await res.json()
+
+      document.getElementById("modal-topic").textContent = data.topic
+      document.getElementById("modal-meta").textContent =
+        `${data.timestamp} · ${data.difficulty} · Score: ${data.score}/${data.total} (${data.percentage}%)`
+
+      // Render questions with answers
+      const questions = data.questions || []
+      const answers   = data.user_answers || []
+
+      document.getElementById("modal-questions").innerHTML =
+        questions.map((q, i) => {
+          const given   = (answers[i] || "").trim().toLowerCase()
+          const correct = (q.correct_answer || "").trim().toLowerCase()
+          const isRight = given === correct
+          return `
+            <div class="q-row">
+              <div class="q-text">Q${i+1}. ${q.question}</div>
+              <div class="ans-row">
+                <span class="${isRight ? "correct-ans" : "wrong-ans"}">
+                  ${isRight ? "✓" : "✗"} Your answer: ${answers[i] || "—"}
+                </span>
+                ${!isRight
+                  ? `<span class="correct-ans">✓ Correct: ${q.correct_answer}</span>`
+                  : ""}
+              </div>
+              <div style="font-size:0.78rem; color:#888; margin-top:5px;">
+                💡 ${q.explanation || ""}
+              </div>
+            </div>`
+        }).join("")
+
+      document.getElementById("modal-feedback").textContent =
+        data.feedback || "No feedback recorded."
+
+      document.getElementById("modal-overlay").classList.add("open")
+
+    } catch(e) {
+      alert("Could not load quiz details.")
+    }
+  }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById("modal-overlay")) closeModalDirect()
+  }
+
+  function closeModalDirect() {
+    document.getElementById("modal-overlay").classList.remove("open")
+  }
+
+  function logout() {
+    localStorage.clear()
+    window.location.href = "index.html"
+  }
+
+  loadHistory()
+</script>
+</body>
+</html>

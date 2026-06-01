@@ -1,0 +1,17 @@
+Subject: Mass Transfer - I
+Topics: Molecular Diffusion, Convective Mass Transfer, Mass Transfer Coefficient, Interphase Mass Transfer, Gas Absorption, Gas Stripping, Packed Column Absorber Design, Packed Tower Mass Transfer Coefficients, HETP, Plate Column Absorption, Distillation Fundamentals, Binary Equilibrium Diagrams, Relative Volatility, Flash Distillation, Batch Distillation, Steam Distillation, Multistage Fractionation, McCabe-Thiele Method, Ponchon-Savarit Analysis, Packed Distillation Towers, Plate Distillation Columns, Multicomponent Distillation, Azeotropic Distillation, Extractive Distillation
+
+Subject: Solid Fluid Operations
+Topics: Single Particle Characterization, Terminal Settling Velocity, Free Settling, Hindered Settling, Fluid Flow Past Obstacles, Fluidization, Particle Size Reduction, Particle Enlargement, Sieving, Froth Flotation, Transport of Solids, Hopper Design, Hopper Clogging, Vibrating Media, Rotating Suspensions, Granular Media, Gravity Chambers, Cyclone Separators, Industrial Bag Filters, Electrostatic Precipitators, Wet Scrubbers, Clarifiers, Dead-End Filtration, Continuous Filtration, Cross-Flow Microfiltration, Forward Osmosis, Agitation, Mixing
+
+Subject: Computer Aided Numerical Methods
+Topics: Numerical Analysis, Simultaneous Linear Equations, Direct Methods, Indirect Methods, Non-Linear Equations, Bracketing Methods, Open Methods, Polynomial Roots, Linear Regression, Nonlinear Regression, Direct Interpolation, Newton Divided Difference Method, Lagrange Interpolation, Inverse Interpolation, Function Approximation, Numerical Differentiation, Numerical Integration, Newton-Cotes Formulas, Composite Integration Methods, Ordinary Differential Equations, Euler Method, Runge-Kutta Methods, Multistep Predictor-Corrector Methods, Differential Algebraic Equations, Boundary Value Problems, Shooting Method, Finite Difference Method, Eigenvalues, Eigenvectors, Partial Differential Equations, Elliptic Equations, Liebmann Method, Irregular Grids, Neumann Boundary Conditions, Parabolic Equations, Explicit Method, Implicit Method, Crank-Nicolson Method, ADI Method, Hyperbolic Equations, Numerical Programming Techniques
+
+Subject: Chemical Reaction Engineering - I
+Topics: Reaction Rate Laws, Stoichiometry, Conversion, Yield, Selectivity, Batch Reactors, Continuous Stirred Tank Reactors, Plug Flow Reactors, Reactor Design Equations, Multiple Reactions, Series Reactions, Parallel Reactions, Temperature Effects on Reactions, Arrhenius Equation, Catalysis, Catalyst Deactivation, Residence Time Distribution, Non-Ideal Reactors
+
+Subject: Process Heat Transfer
+Topics: Heat Conduction, Fourier Law, Steady State Conduction, Unsteady State Conduction, Heat Convection, Natural Convection, Forced Convection, Heat Exchangers, LMTD Method, Effectiveness NTU Method, Radiation Heat Transfer, Black Body Radiation, Heat Transfer Coefficients, Extended Surfaces, Fins, Boiling Heat Transfer, Condensation Heat Transfer
+
+Subject: Chemical Engineering Thermodynamics
+Topics: First Law of Thermodynamics, Second Law of Thermodynamics, Entropy, Gibbs Free Energy, Helmholtz Energy, Phase Equilibrium, Vapor Liquid Equilibrium, Fugacity, Activity Coefficients, Equations of State, Thermodynamic Cycles, Chemical Equilibrium
