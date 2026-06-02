@@ -13,6 +13,8 @@ from risk_engine import generate_intervention_recommendation
 from fastapi.responses import StreamingResponse
 import asyncio
 
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+security = HTTPBearer()
 from agent_handler import (
     handle_chat,
     handle_quiz_start,
@@ -45,28 +47,22 @@ app.add_middleware(
 # ── Auth helpers ─────────────────────────────────────────────
 
 def get_current_user(
-    authorization: str = None,
+    credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db)
 ):
-    from fastapi import Header
-    return authorization
+    token = credentials.credentials
 
-
-from fastapi import Header
-
-def get_current_user(
-    authorization: str = Header(None),
-    db: Session = Depends(get_db)
-):
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    token = authorization.split(" ")[1]
     payload = auth.decode_token(token)
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid token")
-    user = db.query(models.User).filter_by(id=int(payload["sub"])).first()
+
+    user = db.query(models.User).filter_by(
+        id=int(payload["sub"])
+    ).first()
+
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
+
     return user
 
 
