@@ -8,6 +8,10 @@ from datetime import datetime
 from typing import Optional
 import models, auth
 import shutil, os, json, csv, io
+from risk_tasks import recompute_student_risk, recompute_all_student_risks
+from risk_engine import generate_intervention_recommendation
+from fastapi.responses import StreamingResponse
+import asyncio
 
 from agent_handler import (
     handle_chat,
@@ -351,6 +355,82 @@ def chat_message(
         "session_id": session_id
     }
 
+@app.post("/chat/stream")
+async def chat_stream(
+    req: ChatRequest,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not req.session_id:
+        session = get_or_create_session(current_user.id, db)
+        session_id = session.id
+    else:
+        session_id = req.session_id
+
+    async def event_generator():
+        full_response = ""
+
+        try:
+            from langchain_groq import ChatGroq
+
+            llm = ChatGroq(
+                model="llama-3.3-70b-versatile",
+                api_key=os.getenv("GROQ_API_KEY"),
+                temperature=0.4,
+                streaming=True
+            )
+
+            prompt = f"""
+You are Lumina, an AI tutor.
+
+Student question:
+{req.message}
+
+Topic:
+{req.topic}
+
+Respond clearly and helpfully.
+"""
+
+            # Save user message
+            db.add(models.ChatMessage(
+                student_id=current_user.id,
+                session_id=session_id,
+                role="user",
+                content=req.message
+            ))
+            db.commit()
+
+            for chunk in llm.stream(prompt):
+                token = chunk.content or ""
+                if not token:
+                    continue
+
+                full_response += token
+                safe_token = token.replace("\n", "\\n")
+                yield f"data: {safe_token}\n\n"
+
+                await asyncio.sleep(0)
+
+            # Save assistant response after stream finishes
+            db.add(models.ChatMessage(
+                student_id=current_user.id,
+                session_id=session_id,
+                role="assistant",
+                content=full_response
+            ))
+            db.commit()
+
+            yield f"data: [DONE]\n\n"
+
+        except Exception as e:
+            yield f"data: [ERROR] {str(e)}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream"
+    )
+
 
 @app.get("/chat/sessions")
 def get_chat_sessions(
@@ -531,7 +611,9 @@ def get_profile(
         "level": profile.level,
         "learning_style": profile.learning_style,
         "recommended_topic": profile.recommended_topic,
-        "confidence_level": profile.confidence_level
+        "confidence_level": profile.confidence_level,
+        "risk_level": profile.risk_level or "Low",
+        "risk_reasons": profile.risk_reasons or []
     }
 
 @app.get("/student/profile/full")
@@ -551,7 +633,9 @@ def get_full_profile(
         "risk_score": profile.risk_score or 0,
         "attempt_count": profile.attempt_count or 0,
         "recommended_topic": profile.recommended_topic,
-        "confidence_level": profile.confidence_level
+        "confidence_level": profile.confidence_level,
+        "risk_level": profile.risk_level or "Low",
+        "risk_reasons": profile.risk_reasons or []
     }
 
 
@@ -598,6 +682,8 @@ def get_progress(
         "recommended_topic": profile.recommended_topic,
         "confidence_level": profile.confidence_level,
         "topic_avg": topic_avg,
+        "risk_level": profile.risk_level or "Low",
+        "risk_reasons": profile.risk_reasons or [],
         "recent_attempts": [
             {
                 "topic": a.topic,
@@ -712,6 +798,8 @@ def upload_single_mark(
         weak = set(profile.weak_topics or [])
         weak.add(req.subject.lower())
         profile.weak_topics = list(weak)
+
+    recompute_student_risk(student.id, db)
     db.commit()
     return {"message": f"Mark uploaded for {student.name}",
             "grade": grade, "percentage": percentage}
@@ -763,6 +851,8 @@ async def upload_marks_csv(
             success.append(student.name)
         except Exception as e:
             errors.append(f"Row {i}: {str(e)}")
+
+    recompute_student_risk(student.id, db)
     db.commit()
     return {"uploaded": len(success), "errors": errors, "students": success}
 
@@ -866,6 +956,9 @@ def professor_student_detail(
         # "understood_topics": profile.understood_topics or [] if profile else [],
         "attempt_count": len(attempts),
         "topic_avg": topic_avg,
+        "risk_level": profile.risk_level or "Low",
+        "risk_reasons": profile.risk_reasons or [],
+        "intervention_recommendation": generate_intervention_recommendation(student, profile),
         "score_history": [
             {"attempt": i + 1, "score": a.percentage, "topic": a.topic}
             for i, a in enumerate(attempts)
@@ -938,3 +1031,9 @@ def exam_analytics(
         "subject_avg": subject_avg,
         "grade_dist": grade_dist
     }
+
+@app.post("/professor/recompute-risks")
+def recompute_risks(
+    prof: models.User = Depends(require_professor)
+):
+    return {"updated": recompute_all_student_risks()}

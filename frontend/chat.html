@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lumina — AI Tutor Chat</title>
+  <title></title>AdaptLearn — AI Tutor Chat</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -459,7 +459,7 @@
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-top">
         <div class="sidebar-brand">
-          <span class="sidebar-brand-icon">✦</span> Lumina
+          <span class="sidebar-brand-icon">✦</span> AdaptLearn
         </div>
         <button class="new-chat-btn" onclick="newChat()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
@@ -535,7 +535,7 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
           </button>
         </div>
-        <div class="input-hint">Lumina can make mistakes. Verify important information.</div>
+        <div class="input-hint">AdaptLearn AI can make mistakes. Verify important information.</div>
       </div>
 
     </div>
@@ -545,10 +545,10 @@
   <div class="modal-overlay" id="modal-overlay">
     <div class="modal">
       <div class="modal-header">
-        <span class="modal-icon">🧠</span>
+        <span class="modal-icon"></span>
         <h3>Session Analysis</h3>
       </div>
-      <p class="modal-subtitle">What Lumina learned about you this session:</p>
+      <p class="modal-subtitle">What AdaptLearn AI learned about you this session:</p>
       <div id="analysis-content"></div>
       <div class="modal-actions">
         <button class="modal-btn primary" onclick="closeModal()">Continue Learning</button>
@@ -825,7 +825,7 @@
 
       const sender = document.createElement("div")
       sender.className = "msg-sender"
-      sender.textContent = role === "user" ? "You" : "Lumina AI"
+      sender.textContent = role === "user" ? "You" : "AdaptLearn AI"
 
       const bub = document.createElement("div")
       bub.className = "bubble " + (role === "user" ? "user" : "assistant")
@@ -867,7 +867,7 @@
       row.innerHTML = `
         <div class="msg-avatar ai">✦</div>
         <div class="msg-body">
-          <div class="msg-sender">Lumina AI</div>
+          <div class="msg-sender">AdaptLearn AI</div>
           <div class="bubble assistant">
             <div class="thinking-dots"><span></span><span></span><span></span></div>
           </div>

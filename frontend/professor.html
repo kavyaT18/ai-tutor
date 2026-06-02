@@ -416,20 +416,33 @@
   <!-- TAB: Overview -->
   <div id="tab-overview" class="tab-content active">
 
-    <div class="stat-row">
-      <div class="stat-box">
-        <div class="num" id="total-students">--</div>
-        <div class="lbl">Total Students</div>
-      </div>
-      <div class="stat-box">
-        <div class="num red" id="at-risk-count">--</div>
-        <div class="lbl">At Risk (score &gt; 70)</div>
-      </div>
-      <div class="stat-box">
-        <div class="num green" id="class-avg">--</div>
-        <div class="lbl">Class Avg Score</div>
-      </div>
+      <div class="stat-row">
+    <div class="stat-box">
+      <div class="num" id="total-students">--</div>
+      <div class="lbl">Total Students</div>
     </div>
+    <div class="stat-box">
+      <div class="num red" id="at-risk-count">--</div>
+      <div class="lbl">At Risk (score &gt; 70)</div>
+    </div>
+    <div class="stat-box">
+      <div class="num green" id="class-avg">--</div>
+      <div class="lbl">Class Avg Score</div>
+    </div>
+
+    <div class="stat-box">
+      <div class="num green" id="risk-low">--</div>
+      <div class="lbl">Low Risk</div>
+    </div>
+    <div class="stat-box">
+      <div class="num" id="risk-medium">--</div>
+      <div class="lbl">Medium Risk</div>
+    </div>
+    <div class="stat-box">
+      <div class="num red" id="risk-high">--</div>
+      <div class="lbl">High Risk</div>
+    </div>
+  </div>
 
     <div class="section">
       <h3>⚠️ Most common weak topics across all students</h3>
@@ -651,6 +664,8 @@ Topics: Calculus, Linear Algebra, Probability, Statistics</pre>
       </div>
     </div>
 
+    
+
     <p style="font-size:0.8rem; color:#888; margin-bottom:6px;">
       Level: <span id="modal-level" style="color:#4f46e5; font-weight:600;"></span>
       &nbsp;·&nbsp; Last active: <span id="modal-last-active"></span>
@@ -660,6 +675,16 @@ Topics: Calculus, Linear Algebra, Probability, Statistics</pre>
       <p style="font-size:0.82rem; color:#888; margin-bottom:6px;">⚠️ Weak topics</p>
       <div id="modal-weak"></div>
     </div>
+    <div style="margin:14px 0;">
+  <p style="font-size:0.82rem; color:#888; margin-bottom:6px;">Risk reasons</p>
+  <div id="modal-risk-reasons"></div>
+</div>
+
+<div style="margin:14px 0;">
+  <p style="font-size:0.82rem; color:#888; margin-bottom:6px;">AI recommendation</p>
+  <div id="modal-intervention" style="font-size:0.85rem; color:#9e9890; line-height:1.5;"></div>
+</div>
+    
 
     
 
@@ -740,6 +765,14 @@ Topics: Calculus, Linear Algebra, Probability, Statistics</pre>
             <div class="freq-fill" style="width:${(t.count / max) * 100}%"></div>
           </div>
         </div>`).join("")
+
+        const riskRes = await fetch(`${API}/professor/risk-overview`, {
+  headers: { "Authorization": "Bearer " + token }
+})
+const risk = await riskRes.json()
+document.getElementById("risk-low").textContent = risk.Low || 0
+document.getElementById("risk-medium").textContent = risk.Medium || 0
+document.getElementById("risk-high").textContent = risk.High || 0
 
     } catch(e) {
       console.error("Overview load failed:", e)
@@ -832,6 +865,15 @@ Topics: Calculus, Linear Algebra, Probability, Statistics</pre>
       document.getElementById("modal-attempts").textContent = d.attempt_count
       document.getElementById("modal-level").textContent = d.level
       document.getElementById("modal-last-active").textContent = d.last_active
+      document.getElementById("modal-risk").textContent =
+  `${d.risk_score} (${d.risk_level || "Low"})`
+
+document.getElementById("modal-risk-reasons").innerHTML =
+  (d.risk_reasons || []).map(r => `<span class="tag-sm">${r}</span>`).join("") ||
+  `<span style="color:#aaa;font-size:0.82rem;">No major risk signals</span>`
+
+document.getElementById("modal-intervention").textContent =
+  d.intervention_recommendation || "No recommendation available yet."
 
      const weakEl = document.getElementById("modal-weak")
 

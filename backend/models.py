@@ -32,6 +32,8 @@ class StudentProfile(Base):
     #understood_topics    = Column(JSON, default=list)
     avg_score            = Column(Float, default=0.0)
     risk_score           = Column(Float, default=0.0)
+    risk_level = Column(String, default="Low")
+    risk_reasons = Column(JSON, default=list) 
     login_streak         = Column(Integer, default=0)
     days_inactive        = Column(Integer, default=0)
     attempt_count        = Column(Integer, default=0)

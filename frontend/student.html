@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lumina — Student Dashboard</title>
+  <title>AdaptLearn — Student Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -174,7 +174,7 @@
   <header class="topnav">
     <a href="#" class="nav-brand">
       <span class="nav-brand-icon">✦</span>
-      <span class="nav-brand-name">Lumina</span>
+      <span class="nav-brand-name">AdaptLearn</span>
     </a>
     <span class="nav-welcome">Good morning, <strong id="nav-name">—</strong></span>
     <div class="nav-avatar" id="nav-avatar">?</div>
@@ -185,20 +185,20 @@
 
     <aside class="sidebar">
       <div class="sidebar-section">Learn</div>
-      <a href="chat.html" class="sidebar-link active"><span class="s-icon">🤖</span> AI Tutor Chat</a>
-      <a href="quiz.html" class="sidebar-link"><span class="s-icon">📝</span> Take a Quiz</a>
-      <a href="quiz-history.html" class="sidebar-link"><span class="s-icon">📋</span> Quiz History</a>
-      <a href="chat-history.html" class="sidebar-link"><span class="s-icon">💬</span> Chat History</a>
+      <a href="chat.html" class="sidebar-link active"></span> AI Tutor Chat</a>
+      <a href="quiz.html" class="sidebar-link"></span> Take a Quiz</a>
+      <a href="quiz-history.html" class="sidebar-link"></span> Quiz History</a>
+      <a href="chat-history.html" class="sidebar-link"></span> Chat History</a>
 
       <div class="sidebar-section">Track</div>
-      <a href="progress.html" class="sidebar-link"><span class="s-icon">📊</span> My Progress</a>
+      <a href="progress.html" class="sidebar-link"></span> My Progress</a>
       <button class="sidebar-link" onclick="toggleWeakTopics()">
-        <span class="s-icon">⚠️</span> Weak Topics
+        <span class="s-icon"></span> Weak Topics
         <span class="sidebar-badge" id="weak-badge">—</span>
       </button>
 
       <div class="sidebar-section">Account</div>
-      <a href="profile.html" class="sidebar-link"><span class="s-icon">👤</span> My Profile</a>
+      <a href="profile.html" class="sidebar-link"></span> My Profile</a>
     </aside>
 
     <main class="main">
@@ -247,10 +247,11 @@
             <div class="stat-ring-label" id="ring-risk-label">—</div>
           </div>
           <div>
-            <div class="stat-value" id="risk-score" style="color:var(--warning)">—</div>
-            <div class="stat-label">Risk Score</div>
-            <div class="stat-sub">lower is better</div>
-          </div>
+  <div class="stat-value" id="risk-score" style="color:var(--warning)">—</div>
+  <div class="stat-label">Risk Score</div>
+  <div class="stat-sub">lower is better</div>
+  <div class="stat-sub" id="risk-level">Low risk</div>
+</div>
         </div>
       </div>
 
@@ -258,49 +259,49 @@
       <div class="cards-grid">
 
         <a href="chat.html" class="action-card ac-gold">
-          <div class="ac-icon">🤖</div>
+          
           <div class="ac-title">AI Tutor Chat</div>
           <div class="ac-desc">Ask questions, get explanations tailored to your learning level.</div>
           <div class="ac-arrow">Open chat →</div>
         </a>
 
         <a href="quiz.html" class="action-card ac-blue">
-          <div class="ac-icon">📝</div>
+          
           <div class="ac-title">Take a Quiz</div>
           <div class="ac-desc">Test your knowledge and track your score over time.</div>
           <div class="ac-arrow">Start quiz →</div>
         </a>
 
         <a href="quiz-history.html" class="action-card ac-teal">
-          <div class="ac-icon">📋</div>
+          
           <div class="ac-title">Quiz History</div>
           <div class="ac-desc">Review past quizzes, answers, and AI feedback.</div>
           <div class="ac-arrow">View history →</div>
         </a>
 
         <a href="chat-history.html" class="action-card ac-green">
-          <div class="ac-icon">💬</div>
+          
           <div class="ac-title">Chat History</div>
           <div class="ac-desc">Resume or review past tutoring conversations.</div>
           <div class="ac-arrow">Browse sessions →</div>
         </a>
 
         <a href="progress.html" class="action-card ac-gold">
-          <div class="ac-icon">📊</div>
+          
           <div class="ac-title">My Progress</div>
           <div class="ac-desc">Detailed breakdown of scores, weak topics, and risk score.</div>
           <div class="ac-arrow">View progress →</div>
         </a>
 
         <a href="profile.html" class="action-card ac-purple">
-          <div class="ac-icon">👤</div>
+          
           <div class="ac-title">My Profile</div>
           <div class="ac-desc">Set your level, preferred subjects, and learning style.</div>
           <div class="ac-arrow">Edit profile →</div>
         </a>
 
         <div class="action-card ac-red" onclick="toggleWeakTopics()">
-          <div class="ac-icon">⚠️</div>
+          
           <div class="ac-title">Weak Topics</div>
           <div class="ac-desc">See exactly where you need to focus your study time.</div>
           <div class="ac-arrow">Review →</div>
@@ -391,6 +392,8 @@
         document.getElementById("avg-score").textContent  = score.toFixed(0) + "%"
         document.getElementById("weak-count").textContent = weakCount
         document.getElementById("risk-score").textContent = risk.toFixed(0)
+        document.getElementById("risk-level").textContent =
+  `${data.risk_level || "Low"} risk: ${(data.risk_reasons || []).join(", ") || "No major risk signals"}`
         document.getElementById("weak-badge").textContent = weakCount
 
         setRing("ring-score", "ring-score-label", score)

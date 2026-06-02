@@ -4,6 +4,7 @@ from graphs.analyzer_graph import run_analyzer
 from sqlalchemy.orm import Session
 from datetime import datetime
 import models
+from risk_tasks import recompute_student_risk
 
 
 # ── Quiz context builder ─────────────────────────────────────
@@ -218,6 +219,7 @@ def handle_quiz_submit(
     
 
     profile.weak_topics = list(existing.values())  
+    recompute_student_risk(student_id, db)
   
 
     db.commit()
