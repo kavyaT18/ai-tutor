@@ -10,11 +10,10 @@ import numpy as np
 from langchain_groq import ChatGroq
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-
+from langchain_cohere import CohereEmbeddings
 
 logger = logging.getLogger(__name__)
 
-EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 GROQ_MODEL = "llama-3.3-70b-versatile"
 MAX_TEST_CASES = 10
 
@@ -27,8 +26,11 @@ ZERO_SCORES = {
 
 
 @lru_cache(maxsize=1)
-def _get_embedding_model() -> SentenceTransformer:
-    return SentenceTransformer(EMBEDDING_MODEL)
+def _get_embedding_model() -> CohereEmbeddings:
+    return CohereEmbeddings(
+            cohere_api_key=os.getenv("COHERE_API_KEY"),
+            model="embed-english-v3.0"
+        )
 
 
 @lru_cache(maxsize=1)

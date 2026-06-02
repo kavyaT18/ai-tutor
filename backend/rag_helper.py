@@ -4,9 +4,10 @@ from typing import List, Optional
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
-from langchain_community.embeddings import HuggingFaceEmbeddings
+#from langchain_community.embeddings import HuggingFaceEmbeddings
 import chromadb
 from functools import lru_cache
+from langchain_cohere import CohereEmbeddings
 class RAGHelper:
     """
     Helper class for RAG (Retrieval Augmented Generation) functionality.
@@ -23,9 +24,10 @@ class RAGHelper:
         """
         self.collection_name = collection_name
         self.persist_directory = persist_directory
-        self.embeddings = HuggingFaceEmbeddings(
-    model_name="all-MiniLM-L6-v2"  # free, small, fast, downloads once
-)
+        self._embeddings = CohereEmbeddings(
+            cohere_api_key=os.getenv("COHERE_API_KEY"),
+            model="embed-english-v3.0"
+        )
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200,
@@ -215,6 +217,6 @@ class RAGHelper:
             print(f"Error getting document count: {e}")
             return 0
     
-    @lru_cache(maxsize=1)
-    def get_rag():
-        return RAGHelper()
+@lru_cache(maxsize=1)
+def get_rag():
+    return RAGHelper()
