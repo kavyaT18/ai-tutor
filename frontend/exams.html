@@ -324,9 +324,9 @@ carol@email.com,Mid Sem 1,Data Structures,88,100,2024-03-15</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-
+<script src="config.js"></script>
 <script>
-  const API = "http://localhost:8000"
+  // API comes from config.js
   const token = localStorage.getItem("token")
   const role = localStorage.getItem("role")
   if (!token || role !== "professor") window.location.href = "index.html"
