@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 from typing import Any
 load_dotenv()
 
-rag = RAGHelper()
+from rag_helper import get_rag
 search_tool = DuckDuckGoSearchRun()
 
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "checkpoints.db")

@@ -6,7 +6,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
 import chromadb
-
+from functools import lru_cache
 class RAGHelper:
     """
     Helper class for RAG (Retrieval Augmented Generation) functionality.
@@ -215,4 +215,6 @@ class RAGHelper:
             print(f"Error getting document count: {e}")
             return 0
     
-    
+    @lru_cache(maxsize=1)
+    def get_rag():
+        return RAGHelper()

@@ -14,7 +14,7 @@ from rag_helper import RAGHelper
 
 load_dotenv()
 
-rag = RAGHelper()
+from rag_helper import get_rag
 memory = MemorySaver()
 
 

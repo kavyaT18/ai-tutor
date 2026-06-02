@@ -25,8 +25,8 @@ CURRICULUM_FILE = "curriculum.json"
 # Import rag for PDF upload
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from rag_helper import RAGHelper
-rag = RAGHelper()
+from rag_helper import get_rag
+
 
 # Create all tables on startup
 models.Base.metadata.create_all(bind=engine)
@@ -122,7 +122,7 @@ class ExamMarkInput(BaseModel):
     conducted_on: str
 #from rag_evaluator import run_rag_evaluation
 from rag_helper import RAGHelper
-rag_helper = RAGHelper()
+from rag_helper import get_rag
 
 class RAGEvalRequest(BaseModel):
     questions: list  # list of {"question": str, "ground_truth": str}
@@ -144,7 +144,7 @@ async def evaluate_rag(
     for item in req.questions:
         question = item["question"]
         # Retrieve chunks
-        chunks = rag_helper.query(question, k=4)
+        chunks = get_rag().query(question, k=4)
         contexts = [
             c.page_content if hasattr(c, "page_content") else str(c)
             for c in chunks
