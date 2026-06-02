@@ -53,7 +53,7 @@ class QuizOutput(BaseModel):
 def retrieve_context(state: QuizState):
     # More specific query — include subject context
     query = f"educational content about {state['topic']} for quiz questions"
-    chunks = rag.query(query, k=6)
+    chunks = get_rag().query(query, k=6)
 
     # Filter chunks — only keep ones that mention the topic
     topic_words = state["topic"].lower().split()

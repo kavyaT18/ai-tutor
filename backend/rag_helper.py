@@ -118,7 +118,7 @@ class RAGHelper:
             bool: True if successful, False otherwise
         """
         try:
-            from langchain.schema import Document
+            from langchain_core.documents import Document
             
             # Create document
             doc = Document(page_content=text, metadata=metadata or {})

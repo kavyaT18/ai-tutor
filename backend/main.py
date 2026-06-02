@@ -739,7 +739,7 @@ async def upload_pdf(
     path = f"uploads/{file.filename}"
     with open(path, "wb") as f:
         shutil.copyfileobj(file.file, f)
-    success = rag.load_pdf(path)
+    success = get_rag().load_pdf(path)
     return {"message": f"'{file.filename}' uploaded and embedded" if success else "Upload failed"}
 
 @app.get("/uploaded-pdfs")
@@ -747,7 +747,7 @@ async def list_pdfs(current_user: models.User = Depends(get_current_user)):
     os.makedirs("uploads", exist_ok=True)
     files = [f for f in os.listdir("uploads") if f.endswith(".pdf")]
     try:
-        count = rag.get_document_count()
+        count = get_rag().get_document_count()
     except:
         count = 0
     return {"files": files, "chunks_in_db": count}

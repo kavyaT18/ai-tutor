@@ -137,7 +137,7 @@ def determine_intent(state: TutorState):
 def retrieve_rag(state: TutorState):
     if state.get("retrieved_context") != "RAG_NEEDED":
         return {}
-    chunks = rag.query(state["message"], k=4)
+    chunks = get_rag().query(state["message"], k=4)
     sources = []
     context_parts = []
     for chunk in chunks:
