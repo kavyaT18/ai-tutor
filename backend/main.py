@@ -340,11 +340,9 @@ def chat_message(
 
     start_time = time.time()
 
-    response = chatbot_response_logic()
+   # response = chatbot_response_logic()
 
-    latency = time.time() - start_time
-
-    print(f"CHAT LATENCY: {latency:.2f} seconds")
+    
 
     result = handle_chat(
         message=req.message,
@@ -353,6 +351,9 @@ def chat_message(
         session_id=session_id,
         db=db
     )
+    latency = time.time() - start_time
+
+    print(f"CHAT LATENCY: {latency:.2f} seconds")
     return {
         "reply": result["response"],
         "sources": result.get("sources", []),
