@@ -67,7 +67,7 @@ def _cosine_text_similarity(left: str, right: str) -> float:
     if not left or not right:
         raise ValueError("Cosine similarity requires two non-empty strings.")
 
-    embeddings = _get_embedding_model().encode([left, right])
+    embeddings = _get_embedding_model().embed_documents([left, right])
     similarity = cosine_similarity(
         np.asarray([embeddings[0]]),
         np.asarray([embeddings[1]]),
