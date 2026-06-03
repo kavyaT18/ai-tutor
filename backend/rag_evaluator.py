@@ -8,7 +8,7 @@ from typing import Any
 
 import numpy as np
 from langchain_groq import ChatGroq
-from sentence_transformers import SentenceTransformer
+
 from sklearn.metrics.pairwise import cosine_similarity
 from langchain_cohere import CohereEmbeddings
 
