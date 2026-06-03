@@ -13,7 +13,7 @@ build==1.5.0
 certifi==2026.5.20
 cffi==2.0.0
 charset-normalizer==3.4.7
-#chromadb==1.5.9
+chromadb==1.5.9
 click==8.4.1
 cryptography==48.0.0
 dataclasses-json==0.6.7
@@ -161,5 +161,5 @@ xxhash==3.7.0
 yarl==1.24.2
 zstandard==0.25.0
 cohere
-chromadb-client
+#chromadb-client
 langchain-cohere
