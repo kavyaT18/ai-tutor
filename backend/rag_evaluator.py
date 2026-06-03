@@ -23,7 +23,8 @@ ZERO_SCORES = {
     "context_precision": 0.0,
     "context_recall": 0.0,
 }
-
+from dotenv import load_dotenv
+load_dotenv()  # Load environment variables from .env file
 
 @lru_cache(maxsize=1)
 def _get_embedding_model() -> CohereEmbeddings:

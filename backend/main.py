@@ -325,7 +325,7 @@ def get_active_session(
 # ═══════════════════════════════════════════════════════════════
 # CHAT ROUTES
 # ═══════════════════════════════════════════════════════════════
-
+import time
 @app.post("/chat/message")
 def chat_message(
     req: ChatRequest,
@@ -337,6 +337,14 @@ def chat_message(
         session_id = session.id
     else:
         session_id = req.session_id
+
+    start_time = time.time()
+
+    response = chatbot_response_logic()
+
+    latency = time.time() - start_time
+
+    print(f"CHAT LATENCY: {latency:.2f} seconds")
 
     result = handle_chat(
         message=req.message,
