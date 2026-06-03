@@ -876,7 +876,7 @@ def professor_overview(
         else:
             key = t
 
-    topic_freq[key] = topic_freq.get(key, 0) + 1
+        topic_freq[key] = topic_freq.get(key, 0) + 1
     top_weak = sorted(topic_freq.items(), key=lambda x: x[1], reverse=True)[:5]
     return {
         "total_students": len(students),

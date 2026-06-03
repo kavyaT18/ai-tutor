@@ -24,7 +24,7 @@ class RAGHelper:
         """
         self.collection_name = collection_name
         self.persist_directory = persist_directory
-        self._embeddings = CohereEmbeddings(
+        self.embeddings = CohereEmbeddings(
             cohere_api_key=os.getenv("COHERE_API_KEY"),
             model="embed-english-v3.0"
         )
