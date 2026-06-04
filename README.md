@@ -88,55 +88,9 @@ graph TD
 
 ---
 
-## Workflow
 
-### Student
 
-```mermaid
-flowchart LR
-    A[Login] --> B[Session Starts]
-    B --> C{Activity}
-    C -->|Chat| D[Question Sent]
-    D --> E[Intent Detection]
-    E -->|Educational| F[RAG Retrieval]
-    E -->|Web Query| G[Web Search]
-    F --> H[Personalized Response]
-    G --> H
-    H --> I[Saved to DB]
-    C -->|Quiz| J[Type Topic]
-    J --> K[Course Chunks Retrieved]
-    K --> L[MCQs Generated]
-    L --> M[Student Answers]
-    M --> N[Score + Feedback]
-    C -->|End Session| O[Analyzer Runs]
-    O --> P[Weak Topics Detected]
-    P --> Q[Matched to Curriculum]
-    Q --> R[Profile Updated]
-```
 
-### Professor
-
-```mermaid
-flowchart LR
-    A[Login] --> B[Upload PDFs]
-    B --> C[Chunked 500 tokens]
-    C --> D[Embedded via Cohere]
-    D --> E[Stored in ChromaDB]
-    A --> F[Upload Curriculum TXT]
-    F --> G[Subjects and Topics Parsed]
-    G --> H[Stored in PostgreSQL]
-    A --> I[Upload Exam Marks]
-    I --> J[Grades Computed]
-    J --> K[Risk Model Triggered]
-    A --> L[Analytics Dashboard]
-    L --> M[Class Overview]
-    L --> N[Student Drilldown]
-    L --> O[At-Risk Alerts]
-    A --> P[RAG Evaluation]
-    P --> Q[RAGAS Scores]
-```
-
----
 
 ## RAG Pipeline
 
