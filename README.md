@@ -45,29 +45,7 @@ Backend deployed on Render. Frontend deployed on Netlify.
 
 ---
 
-## System Architecture
 
-```mermaid
-graph TD
-    A[Student / Professor Browser] -->|HTTP REST| B[FastAPI Backend]
-    B --> C[JWT Auth]
-    B --> D[Session Manager]
-    B --> E[LangGraph Orchestrator]
-    E --> F[Chat Graph - 7 nodes]
-    E --> G[Quiz Graph - 6 nodes]
-    E --> H[Analyzer Graph]
-    F --> I[RAG Pipeline]
-    G --> I
-    I --> J[ChromaDB + Cohere Embeddings]
-    I --> K[Groq LLM Llama 3.3 70B]
-    H --> L[Topic Matcher LLM]
-    L --> M[Curriculum DB]
-    B --> N[PostgreSQL Neon]
-    B --> O[XGBoost Risk Model]
-    O --> N
-```
-
----
 
 ## Tech Stack
 
